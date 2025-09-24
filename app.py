@@ -27,6 +27,12 @@ class ComparisonResult:
     heritage_total_cto: float
     capital_final_av: float
     capital_final_cto: float
+    patrimoine_total_av: float
+    patrimoine_total_cto: float
+    part_taxable_av: float
+    part_taxable_cto: float
+    impots_payes_av: float
+    impots_payes_cto: float
     difference_totale: float
     relative_difference: Optional[float]
     base_totale: float
@@ -73,6 +79,7 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
     droits_autres_biens_av = calcul_impot_progressif(base_autres_biens_av, bareme_succession)
     heritage_autres_av = inputs.autres_biens_valeur - droits_autres_biens_av
     heritage_total_av = heritage_av + heritage_autres_av
+    patrimoine_total_av = capital_final_av + inputs.autres_biens_valeur
 
     heritage_cto, capital_final_cto = calculer_heritage_cto(
         inputs.capital_initial,
@@ -118,6 +125,12 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         heritage_total_cto=heritage_total_cto,
         capital_final_av=capital_final_av,
         capital_final_cto=capital_final_cto,
+        patrimoine_total_av=patrimoine_total_av,
+        patrimoine_total_cto=actif_total_cto,
+        part_taxable_av=base_autres_biens_av,
+        part_taxable_cto=base_imposable_totale,
+        impots_payes_av=droits_autres_biens_av,
+        impots_payes_cto=droits_totaux_cto,
         difference_totale=difference_totale,
         relative_difference=relative_difference,
         base_totale=base_totale,
