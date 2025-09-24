@@ -159,6 +159,14 @@
                             <td>{{ result.heritage_av | round(2) }} €</td>
                         </tr>
                         <tr>
+                            <th>Autres biens nets (scénario AV)</th>
+                            <td>{{ result.heritage_autres_av | round(2) }} €</td>
+                        </tr>
+                        <tr>
+                            <th>Héritage net total (AV + autres biens)</th>
+                            <td>{{ result.heritage_total_av | round(2) }} €</td>
+                        </tr>
+                        <tr>
                             <th>Capital final CTO</th>
                             <td>{{ result.capital_final_cto | round(2) }} €</td>
                         </tr>
@@ -167,8 +175,16 @@
                             <td>{{ result.heritage_cto | round(2) }} €</td>
                         </tr>
                         <tr>
-                            <th>Différence (AV - CTO)</th>
-                            <td>{{ result.difference | round(2) }} €</td>
+                            <th>Autres biens nets (scénario CTO)</th>
+                            <td>{{ result.heritage_autres_cto | round(2) }} €</td>
+                        </tr>
+                        <tr>
+                            <th>Héritage net total (CTO + autres biens)</th>
+                            <td>{{ result.heritage_total_cto | round(2) }} €</td>
+                        </tr>
+                        <tr>
+                            <th>Différence totale (scénario AV - scénario CTO)</th>
+                            <td>{{ result.difference_totale | round(2) }} €</td>
                         </tr>
                         <tr>
                             <th>Différence relative</th>
@@ -192,6 +208,10 @@
                     <li>Abattement succession total : {{ details.abattement_succession_total | round(2) }} €</li>
                     <li>Abattement assurance-vie unitaire : {{ details.abattement_av_unitaire | round(2) }} €</li>
                     <li>Abattement assurance-vie total : {{ details.abattement_av_total | round(2) }} €</li>
+                    <li>Droits sur autres biens (scénario AV) : {{ details.droits_autres_biens_scenario_av | round(2) }} €</li>
+                    <li>Droits totaux (scénario CTO) : {{ details.droits_totaux_scenario_cto | round(2) }} €</li>
+                    <li>Droits imputés sur le CTO : {{ details.droits_cto | round(2) }} €</li>
+                    <li>Droits sur autres biens (scénario CTO) : {{ details.droits_autres_biens_scenario_cto | round(2) }} €</li>
                 </ul>
             </section>
         {% endif %}

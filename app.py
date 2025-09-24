@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 from flask import Flask, render_template, request
 
 from CTO_vs_AV import (
+    calcul_impot_progressif,
     calculer_heritage_assurance_vie,
     calculer_heritage_cto,
     get_regime_successoral,
@@ -20,9 +21,13 @@ app = Flask(__name__)
 class ComparisonResult:
     heritage_av: float
     heritage_cto: float
+    heritage_autres_av: float
+    heritage_autres_cto: float
+    heritage_total_av: float
+    heritage_total_cto: float
     capital_final_av: float
     capital_final_cto: float
-    difference: float
+    difference_totale: float
     relative_difference: Optional[float]
     base_totale: float
 
@@ -64,6 +69,11 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         bareme_av,
     )
 
+    base_autres_biens_av = max(0.0, inputs.autres_biens_valeur - abattement_succession_total)
+    droits_autres_biens_av = calcul_impot_progressif(base_autres_biens_av, bareme_succession)
+    heritage_autres_av = inputs.autres_biens_valeur - droits_autres_biens_av
+    heritage_total_av = heritage_av + heritage_autres_av
+
     heritage_cto, capital_final_cto = calculer_heritage_cto(
         inputs.capital_initial,
         inputs.duree,
@@ -73,25 +83,42 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         bareme_succession,
     )
 
-    base_totale = capital_final_cto + inputs.autres_biens_valeur
-    difference = heritage_av - heritage_cto
+    actif_total_cto = capital_final_cto + inputs.autres_biens_valeur
+    base_imposable_totale = max(0.0, actif_total_cto - abattement_succession_total)
+    droits_totaux_cto = calcul_impot_progressif(base_imposable_totale, bareme_succession)
+    part_cto = 0.0 if actif_total_cto == 0 else capital_final_cto / actif_total_cto
+    droits_cto = droits_totaux_cto * part_cto
+    droits_autres_cto = droits_totaux_cto - droits_cto
+    heritage_autres_cto = inputs.autres_biens_valeur - droits_autres_cto
+    heritage_total_cto = heritage_cto + heritage_autres_cto
+
+    base_totale = actif_total_cto
+    difference_totale = heritage_total_av - heritage_total_cto
     relative_difference = None
     if base_totale > 0:
-        relative_difference = difference / base_totale
+        relative_difference = difference_totale / base_totale
 
     details = {
         "abattement_succession_unitaire": abattement_par_heritier,
         "abattement_succession_total": abattement_succession_total,
         "abattement_av_unitaire": abattement_av,
         "abattement_av_total": abattement_fiscal_av_total,
+        "droits_autres_biens_scenario_av": droits_autres_biens_av,
+        "droits_totaux_scenario_cto": droits_totaux_cto,
+        "droits_cto": droits_cto,
+        "droits_autres_biens_scenario_cto": droits_autres_cto,
     }
 
     result = ComparisonResult(
         heritage_av=heritage_av,
         heritage_cto=heritage_cto,
+        heritage_autres_av=heritage_autres_av,
+        heritage_autres_cto=heritage_autres_cto,
+        heritage_total_av=heritage_total_av,
+        heritage_total_cto=heritage_total_cto,
         capital_final_av=capital_final_av,
         capital_final_cto=capital_final_cto,
-        difference=difference,
+        difference_totale=difference_totale,
         relative_difference=relative_difference,
         base_totale=base_totale,
     )
