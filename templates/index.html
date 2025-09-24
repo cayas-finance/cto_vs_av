@@ -133,12 +133,6 @@
                 <option value="sans_lien" {% if form_values.get('lien', defaults['lien']) == 'sans_lien' %}selected{% endif %}>Sans lien</option>
             </select>
         </div>
-        <div>
-            <label>
-                <input type="checkbox" id="versements_av_avant70" name="versements_av_avant70" {% if form_values.get('versements_av_avant70', defaults['versements_av_avant70']) in ('on', 'true', True) %}checked{% endif %}>
-                Versements avant 70 ans
-            </label>
-        </div>
         <div class="full-width">
             <button type="submit">Comparer</button>
         </div>
