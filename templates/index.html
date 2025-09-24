@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Comparaison Assurance-vie vs CTO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #1f3c88;
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        main {
+            margin: 2rem auto;
+            max-width: 960px;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem 2rem;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        button {
+            background-color: #1f3c88;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #162c63;
+        }
+        .results, .errors {
+            margin-top: 2rem;
+            grid-column: 1 / -1;
+        }
+        .results table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .results th, .results td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: left;
+        }
+        .results th {
+            background-color: #f0f4ff;
+        }
+        .alert {
+            color: #a94442;
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+            padding: 0.75rem;
+            border-radius: 4px;
+        }
+        .help-text {
+            font-size: 0.85rem;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Comparer Assurance-vie et CTO</h1>
+    <p>Saisissez vos hypothèses pour évaluer l'héritage net à échéance et à rendement constant.</p>
+</header>
+<main>
+    <form method="post">
+        <div>
+            <label for="capital_initial">Capital initial (AV &amp; CTO)</label>
+            <input type="number" step="0.01" id="capital_initial" name="capital_initial" value="{{ form_values.get('capital_initial', defaults['capital_initial']) }}" required>
+        </div>
+        <div>
+            <label for="autres_biens_valeur">Autres biens soumis à succession</label>
+            <input type="number" step="0.01" id="autres_biens_valeur" name="autres_biens_valeur" value="{{ form_values.get('autres_biens_valeur', defaults['autres_biens_valeur']) }}">
+        </div>
+        <div>
+            <label for="duree">Durée du placement (années)</label>
+            <input type="number" step="0.1" id="duree" name="duree" value="{{ form_values.get('duree', defaults['duree']) }}" min="0">
+        </div>
+        <div>
+            <label for="rendement_annuel">Rendement annuel (décimal)</label>
+            <input type="number" step="0.0001" id="rendement_annuel" name="rendement_annuel" value="{{ form_values.get('rendement_annuel', defaults['rendement_annuel']) }}">
+            <p class="help-text">Exemple : 0,04 pour 4 % par an.</p>
+        </div>
+        <div>
+            <label for="frais_gestion_av">Frais de gestion annuels AV (décimal)</label>
+            <input type="number" step="0.0001" id="frais_gestion_av" name="frais_gestion_av" value="{{ form_values.get('frais_gestion_av', defaults['frais_gestion_av']) }}">
+        </div>
+        <div>
+            <label for="frais_sociaux_av">Prélèvements sociaux AV (décimal)</label>
+            <input type="number" step="0.0001" id="frais_sociaux_av" name="frais_sociaux_av" value="{{ form_values.get('frais_sociaux_av', defaults['frais_sociaux_av']) }}">
+        </div>
+        <div>
+            <label for="nb_heriters">Nombre d'héritiers</label>
+            <input type="number" min="1" id="nb_heriters" name="nb_heriters" value="{{ form_values.get('nb_heriters', defaults['nb_heriters']) }}" required>
+        </div>
+        <div>
+            <label for="nb_beneficiaires">Nombre de bénéficiaires AV</label>
+            <input type="number" min="1" id="nb_beneficiaires" name="nb_beneficiaires" value="{{ form_values.get('nb_beneficiaires', defaults['nb_beneficiaires']) }}" required>
+        </div>
+        <div>
+            <label for="lien">Lien de parenté</label>
+            <select id="lien" name="lien">
+                <option value="ligne_directe" {% if form_values.get('lien', defaults['lien']) == 'ligne_directe' %}selected{% endif %}>Ligne directe (enfant/parent)</option>
+                <option value="frere_soeur" {% if form_values.get('lien', defaults['lien']) == 'frere_soeur' %}selected{% endif %}>Frère / Soeur</option>
+                <option value="neveu_niece" {% if form_values.get('lien', defaults['lien']) == 'neveu_niece' %}selected{% endif %}>Neveu / Nièce</option>
+                <option value="sans_lien" {% if form_values.get('lien', defaults['lien']) == 'sans_lien' %}selected{% endif %}>Sans lien</option>
+            </select>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="versements_av_avant70" name="versements_av_avant70" {% if form_values.get('versements_av_avant70', defaults['versements_av_avant70']) in ('on', 'true', True) %}checked{% endif %}>
+                Versements avant 70 ans
+            </label>
+        </div>
+        <div class="full-width">
+            <button type="submit">Comparer</button>
+        </div>
+
+        {% if errors %}
+            <div class="errors full-width">
+                {% for error in errors %}
+                    <p class="alert">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if result %}
+            <section class="results full-width">
+                <h2>Résultats</h2>
+                <table>
+                    <tbody>
+                        <tr>
+                            <th>Capital final Assurance-vie</th>
+                            <td>{{ result.capital_final_av | round(2) }} €</td>
+                        </tr>
+                        <tr>
+                            <th>Héritage net Assurance-vie</th>
+                            <td>{{ result.heritage_av | round(2) }} €</td>
+                        </tr>
+                        <tr>
+                            <th>Capital final CTO</th>
+                            <td>{{ result.capital_final_cto | round(2) }} €</td>
+                        </tr>
+                        <tr>
+                            <th>Héritage net CTO</th>
+                            <td>{{ result.heritage_cto | round(2) }} €</td>
+                        </tr>
+                        <tr>
+                            <th>Différence (AV - CTO)</th>
+                            <td>{{ result.difference | round(2) }} €</td>
+                        </tr>
+                        <tr>
+                            <th>Différence relative</th>
+                            <td>
+                                {% if result.relative_difference is not none %}
+                                    {{ (result.relative_difference * 100) | round(2) }} %
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Base taxable totale (CTO + autres biens)</th>
+                            <td>{{ result.base_totale | round(2) }} €</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3>Détails des abattements</h3>
+                <ul>
+                    <li>Abattement succession unitaire : {{ details.abattement_succession_unitaire | round(2) }} €</li>
+                    <li>Abattement succession total : {{ details.abattement_succession_total | round(2) }} €</li>
+                    <li>Abattement assurance-vie unitaire : {{ details.abattement_av_unitaire | round(2) }} €</li>
+                    <li>Abattement assurance-vie total : {{ details.abattement_av_total | round(2) }} €</li>
+                </ul>
+            </section>
+        {% endif %}
+    </form>
+</main>
+</body>
+</html>
