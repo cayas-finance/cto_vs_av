@@ -68,8 +68,12 @@
             border-bottom: 1px solid #e0e0e0;
             text-align: left;
         }
-        .results th {
+        .results thead th {
             background-color: #f0f4ff;
+        }
+        .results tbody th {
+            font-weight: 600;
+            width: 40%;
         }
         .alert {
             color: #a94442;
@@ -81,6 +85,16 @@
         .help-text {
             font-size: 0.85rem;
             color: #555;
+        }
+        .difference-card {
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            border: 1px solid #d6dcf5;
+            border-radius: 6px;
+            background-color: #f8f9ff;
+        }
+        .difference-card h3 {
+            margin-top: 0;
         }
     </style>
 </head>
@@ -149,59 +163,47 @@
             <section class="results full-width">
                 <h2>Résultats</h2>
                 <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Solution AV</th>
+                            <th>Solution CTO</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <tr>
-                            <th>Capital final Assurance-vie</th>
-                            <td>{{ result.capital_final_av | round(2) }} €</td>
+                            <th scope="row">Patrimoine total</th>
+                            <td>{{ result.patrimoine_total_av | round(2) }} €</td>
+                            <td>{{ result.patrimoine_total_cto | round(2) }} €</td>
                         </tr>
                         <tr>
-                            <th>Héritage net Assurance-vie</th>
-                            <td>{{ result.heritage_av | round(2) }} €</td>
+                            <th scope="row">Part taxable</th>
+                            <td>{{ result.part_taxable_av | round(2) }} €</td>
+                            <td>{{ result.part_taxable_cto | round(2) }} €</td>
                         </tr>
                         <tr>
-                            <th>Autres biens nets (scénario AV)</th>
-                            <td>{{ result.heritage_autres_av | round(2) }} €</td>
+                            <th scope="row">Impôts payés</th>
+                            <td>{{ result.impots_payes_av | round(2) }} €</td>
+                            <td>{{ result.impots_payes_cto | round(2) }} €</td>
                         </tr>
                         <tr>
-                            <th>Héritage net total (AV + autres biens)</th>
+                            <th scope="row">Héritage net de frais</th>
                             <td>{{ result.heritage_total_av | round(2) }} €</td>
-                        </tr>
-                        <tr>
-                            <th>Capital final CTO</th>
-                            <td>{{ result.capital_final_cto | round(2) }} €</td>
-                        </tr>
-                        <tr>
-                            <th>Héritage net CTO</th>
-                            <td>{{ result.heritage_cto | round(2) }} €</td>
-                        </tr>
-                        <tr>
-                            <th>Autres biens nets (scénario CTO)</th>
-                            <td>{{ result.heritage_autres_cto | round(2) }} €</td>
-                        </tr>
-                        <tr>
-                            <th>Héritage net total (CTO + autres biens)</th>
                             <td>{{ result.heritage_total_cto | round(2) }} €</td>
-                        </tr>
-                        <tr>
-                            <th>Différence totale (scénario AV - scénario CTO)</th>
-                            <td>{{ result.difference_totale | round(2) }} €</td>
-                        </tr>
-                        <tr>
-                            <th>Différence relative</th>
-                            <td>
-                                {% if result.relative_difference is not none %}
-                                    {{ (result.relative_difference * 100) | round(2) }} %
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Base taxable totale (CTO + autres biens)</th>
-                            <td>{{ result.base_totale | round(2) }} €</td>
                         </tr>
                     </tbody>
                 </table>
+                <div class="difference-card">
+                    <h3>Écart entre les solutions</h3>
+                    <p><strong>Différence brute (AV - CTO) :</strong> {{ result.difference_totale | round(2) }} €</p>
+                    <p><strong>Différence relative :</strong>
+                        {% if result.relative_difference is not none %}
+                            {{ (result.relative_difference * 100) | round(2) }} %
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </p>
+                </div>
                 <h3>Détails des abattements</h3>
                 <ul>
                     <li>Abattement succession unitaire : {{ details.abattement_succession_unitaire | round(2) }} €</li>
