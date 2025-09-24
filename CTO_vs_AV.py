@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
@@ -76,14 +78,28 @@ def get_regime_successoral(lien: str):
         raise ValueError(f"Lien non reconnu: {lien}")
     return abattement, bareme
 
+@dataclass
+class AssuranceVieResult:
+    heritage_net: float
+    capital_final: float
+    prelevements_sociaux: float
+    droits_av: float
+
+
+@dataclass
+class CTOResult:
+    heritage_net: float
+    capital_final: float
+    droits_imputes_cto: float
+    droits_totaux: float
+
+
 # ---------- Assurance-vie ----------
 def calculer_heritage_assurance_vie(
     capital_initial, annee, rendement, frais_gestion, frais_sociaux,
     abattement_fiscal_av_total, bareme_av
-):
-    """
-    'bareme_av' s'applique APRÈS abattement AV total (152 500 € * nb_bénéficiaires si versements < 70 ans).
-    """
+) -> AssuranceVieResult:
+    """Calcule les montants nets et l'impôt appliqués au contrat d'assurance-vie."""
     rendement_net = rendement - frais_gestion
     capital_final = capital_initial * (1 + rendement_net) ** annee
     plus_value = capital_final - capital_initial
@@ -97,7 +113,13 @@ def calculer_heritage_assurance_vie(
     droits_av = calcul_impot_progressif(base_imposable_av, bareme_av)
 
     heritage_net = capital_apres_ps - droits_av
-    return heritage_net, capital_final
+    return AssuranceVieResult(
+        heritage_net=heritage_net,
+        capital_final=capital_final,
+        prelevements_sociaux=prelevements_sociaux,
+        droits_av=droits_av,
+    )
+
 
 # ---------- CTO / Succession ----------
 def calculer_heritage_cto(
@@ -105,12 +127,8 @@ def calculer_heritage_cto(
     autres_biens_valeur,
     abattement_succession_total,
     bareme_succession
-):
-    """
-    'bareme_succession' = barème des droits de succession (dépend du lien).
-    'abattement_succession_total' = abattement par héritier * nb_héritiers.
-    L'impôt total est imputé proportionnellement au poids du CTO dans l'actif taxable.
-    """
+) -> CTOResult:
+    """Calcule les montants nets et l'impôt imputé au CTO lors de la succession."""
     capital_final_cto = capital_initial * (1 + rendement) ** annee
 
     actif_total = capital_final_cto + autres_biens_valeur
@@ -123,7 +141,12 @@ def calculer_heritage_cto(
     droits_imputes_cto = droits_totaux * part_cto
 
     heritage_net = capital_final_cto - droits_imputes_cto
-    return heritage_net, capital_final_cto
+    return CTOResult(
+        heritage_net=heritage_net,
+        capital_final=capital_final_cto,
+        droits_imputes_cto=droits_imputes_cto,
+        droits_totaux=droits_totaux,
+    )
 
 # ---------- Simulation + tracé ----------
 from matplotlib.colors import TwoSlopeNorm
@@ -169,42 +192,42 @@ def simuler_et_tracer(
     diff_heritage1 = np.zeros((resolution, resolution))
     for i in range(resolution):
         for j in range(resolution):
-            heritage_av, _ = calculer_heritage_assurance_vie(
+            av_result = calculer_heritage_assurance_vie(
                 capital_initial, annees[j], rendement_fixe, frais_gestion[i], frais_sociaux_av,
                 abattement_fiscal_av_total, bareme_av
             )
-            heritage_cto, capital_cto_final = calculer_heritage_cto(
+            cto_result = calculer_heritage_cto(
                 capital_initial, annees[j], rendement_fixe,
                 autres_biens_valeur,
                 abattement_succession_total,
                 bareme_succession
             )
-            base_totale = capital_cto_final + autres_biens_valeur
+            base_totale = cto_result.capital_final + autres_biens_valeur
             if relatif:
                 # éviter /0 : si base_totale=0 on met 0 (ou np.nan si tu préfères)
-                diff_heritage1[i, j] = 0.0 if base_totale <= 0 else (heritage_av - heritage_cto) / base_totale
+                diff_heritage1[i, j] = 0.0 if base_totale <= 0 else (av_result.heritage_net - cto_result.heritage_net) / base_totale
             else:
-                diff_heritage1[i, j] = heritage_av - heritage_cto
+                diff_heritage1[i, j] = av_result.heritage_net - cto_result.heritage_net
 
     # --- Heatmap Rendement vs Durée (frais fixes) ---
     diff_heritage2 = np.zeros((resolution, resolution))
     for i in range(resolution):
         for j in range(resolution):
-            heritage_av, _ = calculer_heritage_assurance_vie(
+            av_result = calculer_heritage_assurance_vie(
                 capital_initial, annees[j], rendements[i], frais_av_fixe, frais_sociaux_av,
                 abattement_fiscal_av_total, bareme_av
             )
-            heritage_cto, capital_cto_final = calculer_heritage_cto(
+            cto_result = calculer_heritage_cto(
                 capital_initial, annees[j], rendements[i],
                 autres_biens_valeur,
                 abattement_succession_total,
                 bareme_succession
             )
-            base_totale = capital_cto_final + autres_biens_valeur
+            base_totale = cto_result.capital_final + autres_biens_valeur
             if relatif:
-                diff_heritage2[i, j] = 0.0 if base_totale <= 0 else (heritage_av - heritage_cto) / base_totale
+                diff_heritage2[i, j] = 0.0 if base_totale <= 0 else (av_result.heritage_net - cto_result.heritage_net) / base_totale
             else:
-                diff_heritage2[i, j] = heritage_av - heritage_cto
+                diff_heritage2[i, j] = av_result.heritage_net - cto_result.heritage_net
 
     # --- Harmonisation de l'échelle & tracé ---
     # bornes communes (ignorer d'éventuels NaN)

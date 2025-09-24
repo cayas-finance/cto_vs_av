@@ -139,6 +139,11 @@
             <input type="number" min="1" id="nb_beneficiaires" name="nb_beneficiaires" value="{{ form_values.get('nb_beneficiaires', defaults['nb_beneficiaires']) }}" required>
         </div>
         <div>
+            <label for="versements_av_avant70">Versements AV effectués avant 70 ans ?</label>
+            <input type="checkbox" id="versements_av_avant70" name="versements_av_avant70" {% if form_values.get('versements_av_avant70') %}checked{% endif %}>
+            <p class="help-text">Cochez si tous les versements sur l'assurance-vie ont été faits avant 70 ans (abattement de 152&nbsp;500&nbsp;€ par bénéficiaire).</p>
+        </div>
+        <div>
             <label for="lien">Lien de parenté</label>
             <select id="lien" name="lien">
                 <option value="ligne_directe" {% if form_values.get('lien', defaults['lien']) == 'ligne_directe' %}selected{% endif %}>Ligne directe (enfant/parent)</option>
@@ -187,6 +192,16 @@
                             <td>{{ result.impots_payes_cto | round(2) }} €</td>
                         </tr>
                         <tr>
+                            <th scope="row">&nbsp;&nbsp;• dont impôts sur le support</th>
+                            <td>{{ result.impots_support_av | round(2) }} €</td>
+                            <td>{{ result.impots_support_cto | round(2) }} €</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">&nbsp;&nbsp;• dont impôts sur autres biens</th>
+                            <td>{{ result.impots_autres_av | round(2) }} €</td>
+                            <td>{{ result.impots_autres_cto | round(2) }} €</td>
+                        </tr>
+                        <tr>
                             <th scope="row">Héritage net de frais</th>
                             <td>{{ result.heritage_total_av | round(2) }} €</td>
                             <td>{{ result.heritage_total_cto | round(2) }} €</td>
@@ -210,6 +225,8 @@
                     <li>Abattement succession total : {{ details.abattement_succession_total | round(2) }} €</li>
                     <li>Abattement assurance-vie unitaire : {{ details.abattement_av_unitaire | round(2) }} €</li>
                     <li>Abattement assurance-vie total : {{ details.abattement_av_total | round(2) }} €</li>
+                    <li>Prélèvements sociaux sur l'assurance-vie : {{ details.prelevements_sociaux_av | round(2) }} €</li>
+                    <li>Droits sur l'assurance-vie après abattement : {{ details.droits_sur_assurance_vie | round(2) }} €</li>
                     <li>Droits sur autres biens (scénario AV) : {{ details.droits_autres_biens_scenario_av | round(2) }} €</li>
                     <li>Droits totaux (scénario CTO) : {{ details.droits_totaux_scenario_cto | round(2) }} €</li>
                     <li>Droits imputés sur le CTO : {{ details.droits_cto | round(2) }} €</li>
