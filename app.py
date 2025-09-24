@@ -33,6 +33,11 @@ class ComparisonResult:
     part_taxable_cto: float
     impots_payes_av: float
     impots_payes_cto: float
+    impots_support_av: float
+    impots_autres_av: float
+    impots_support_cto: float
+    impots_autres_cto: float
+    prelevements_sociaux_av: float
     difference_totale: float
     relative_difference: Optional[float]
     base_totale: float
@@ -65,7 +70,7 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
 
     abattement_fiscal_av_total = abattement_av * inputs.nb_beneficiaires
 
-    heritage_av, capital_final_av = calculer_heritage_assurance_vie(
+    av_result = calculer_heritage_assurance_vie(
         inputs.capital_initial,
         inputs.duree,
         inputs.rendement_annuel,
@@ -74,6 +79,10 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         abattement_fiscal_av_total,
         bareme_av,
     )
+    heritage_av = av_result.heritage_net
+    capital_final_av = av_result.capital_final
+    prelevements_sociaux_av = av_result.prelevements_sociaux
+    droits_av = av_result.droits_av
 
     base_autres_biens_av = max(0.0, inputs.autres_biens_valeur - abattement_succession_total)
     droits_autres_biens_av = calcul_impot_progressif(base_autres_biens_av, bareme_succession)
@@ -81,7 +90,7 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
     heritage_total_av = heritage_av + heritage_autres_av
     patrimoine_total_av = capital_final_av + inputs.autres_biens_valeur
 
-    heritage_cto, capital_final_cto = calculer_heritage_cto(
+    cto_result = calculer_heritage_cto(
         inputs.capital_initial,
         inputs.duree,
         inputs.rendement_annuel,
@@ -89,15 +98,23 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         abattement_succession_total,
         bareme_succession,
     )
+    heritage_cto = cto_result.heritage_net
+    capital_final_cto = cto_result.capital_final
+    droits_cto = cto_result.droits_imputes_cto
+    droits_totaux_cto = cto_result.droits_totaux
 
     actif_total_cto = capital_final_cto + inputs.autres_biens_valeur
     base_imposable_totale = max(0.0, actif_total_cto - abattement_succession_total)
-    droits_totaux_cto = calcul_impot_progressif(base_imposable_totale, bareme_succession)
-    part_cto = 0.0 if actif_total_cto == 0 else capital_final_cto / actif_total_cto
-    droits_cto = droits_totaux_cto * part_cto
     droits_autres_cto = droits_totaux_cto - droits_cto
     heritage_autres_cto = inputs.autres_biens_valeur - droits_autres_cto
     heritage_total_cto = heritage_cto + heritage_autres_cto
+
+    impots_support_av = prelevements_sociaux_av + droits_av
+    impots_autres_av = droits_autres_biens_av
+    impots_support_cto = droits_cto
+    impots_autres_cto = droits_autres_cto
+    impots_total_av = impots_support_av + impots_autres_av
+    impots_total_cto = droits_totaux_cto
 
     base_totale = actif_total_cto
     difference_totale = heritage_total_av - heritage_total_cto
@@ -110,6 +127,8 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         "abattement_succession_total": abattement_succession_total,
         "abattement_av_unitaire": abattement_av,
         "abattement_av_total": abattement_fiscal_av_total,
+        "prelevements_sociaux_av": prelevements_sociaux_av,
+        "droits_sur_assurance_vie": droits_av,
         "droits_autres_biens_scenario_av": droits_autres_biens_av,
         "droits_totaux_scenario_cto": droits_totaux_cto,
         "droits_cto": droits_cto,
@@ -129,8 +148,13 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         patrimoine_total_cto=actif_total_cto,
         part_taxable_av=base_autres_biens_av,
         part_taxable_cto=base_imposable_totale,
-        impots_payes_av=droits_autres_biens_av,
-        impots_payes_cto=droits_totaux_cto,
+        impots_payes_av=impots_total_av,
+        impots_payes_cto=impots_total_cto,
+        impots_support_av=impots_support_av,
+        impots_autres_av=impots_autres_av,
+        impots_support_cto=impots_support_cto,
+        impots_autres_cto=impots_autres_cto,
+        prelevements_sociaux_av=prelevements_sociaux_av,
         difference_totale=difference_totale,
         relative_difference=relative_difference,
         base_totale=base_totale,
