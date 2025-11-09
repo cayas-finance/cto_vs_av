@@ -1,0 +1,92 @@
+\documentclass[a4paper, 11pt]{article}
+
+% --- PACKAGES ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{natbib}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{xcolor}
+\usepackage{sectsty}
+\usepackage{float}
+
+% --- CONFIGURATION ---
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+\graphicspath{ {./src/images/} }
+
+% --- COLORS ---
+\definecolor{Fushia}{HTML}{ed1e79}
+\definecolor{FlashGreen}{HTML}{7cfa72}
+\definecolor{NeonBlue}{HTML}{75fafc}
+
+\hypersetup{colorlinks=false}
+
+\sectionfont{\color{black}}
+\subsectionfont{\color{black}}
+\subsubsectionfont{\color{black}}
+
+% Légendes homogènes (petite taille, étiquette en gras, centrées)
+\captionsetup{justification=centering}
+
+\title{\textbf{Comparaison fiscale AV vs CTO}}
+\author{CAYAS}
+\date{\today}
+
+% --- DOCUMENT ---
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vfill
+    \includegraphics[width=0.4\textwidth]{logo.png}\par\vspace{1cm}
+    {\Huge\bfseries Comparaison fiscale AV vs CTO \par}
+    \vspace{1cm}
+    {\Large CAYAS \par}
+    \vfill
+    {\large \today \par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% --- SECTIONS ---
+
+\input{src/introduction_generale/introduction.tex}
+
+\section{Présentation des deux enveloppes fiscales}
+\label{sec:presentation}
+\input{src/presentation_des_deux_enveloppes_fiscales/assurance_vie.tex}
+\input{src/presentation_des_deux_enveloppes_fiscales/compte_titres_ordinaire.tex}
+
+\section{Analyse comparative}
+\label{sec:analyse}
+\input{src/analyse_comparative/notations_et_hypotheses.tex}
+\input{src/analyse_comparative/formulation_des_droits_de_succession.tex}
+\input{src/analyse_comparative/difference_heritage_net.tex}
+\input{src/analyse_comparative/cas_limites.tex}
+
+\section{Simulations numériques sans retrait}
+\label{sec:simulations_sans_retrait}
+\input{src/simulations_numeriques_sans_retrait/methodologie.tex}
+\input{src/simulations_numeriques_sans_retrait/cas_1_patrimoine_1M.tex}
+\input{src/simulations_numeriques_sans_retrait/cas_2_patrimoine_300k.tex}
+\input{src/simulations_numeriques_sans_retrait/transmission_indirecte.tex}
+\input{src/simulations_numeriques_sans_retrait/analyses_de_sensibilite.tex}
+
+%\section{Simulations numériques avec retrait annuel}
+%\label{sec:simulations_avec_retrait}
+%\input{src/simulations_numeriques_avec_retrait_annuel/cadre_methodologique.tex}
+%\input{src/simulations_numeriques_avec_retrait_annuel/scenarios_et_parametres.tex}
+
+\input{src/conclusion_generale/conclusion.tex}
+
+
+% --- BIBLIOGRAPHY ---
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

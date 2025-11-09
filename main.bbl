@@ -1,0 +1,40 @@
+\begin{thebibliography}{8}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[{Banque de France}(2025)]{rapport_observatoire_epargne_2025}
+{Banque de France}.
+\newblock Rapport annuel 2025 de l'observatoire des produits d'épargne financière, 2025.
+
+\bibitem[{Direction générale des Finances publiques}(2025{\natexlab{a}})]{bofip_droits_mutation_general}
+{Direction générale des Finances publiques}.
+\newblock Bofip-impôts : Droits de mutation par décès - tarif et liquidation des droits - régime général, 2025{\natexlab{a}}.
+
+\bibitem[{Direction générale des Finances publiques}(2025{\natexlab{b}})]{bofip_mutations_av}
+{Direction générale des Finances publiques}.
+\newblock Bofip-impôts : Droits de mutation par décès - régime spécifique des contrats d'assurance-vie, 2025{\natexlab{b}}.
+
+\bibitem[{Direction générale des Finances publiques}(2025{\natexlab{c}})]{bofip_ps_av}
+{Direction générale des Finances publiques}.
+\newblock Bofip-impôts : Calcul des prélèvements sociaux en assurance vie, 2025{\natexlab{c}}.
+
+\bibitem[{France Assureurs}(2025)]{assurance_vie_chiffres_2025}
+{France Assureurs}.
+\newblock Assurance-vie : chiffres clés 2024-2025, 2025.
+
+\bibitem[{Legifrance}(2025{\natexlab{a}})]{cgi_757b}
+{Legifrance}.
+\newblock Code général des impôts, article 757 b, 2025{\natexlab{a}}.
+
+\bibitem[{Legifrance}(2025{\natexlab{b}})]{cgi_990i}
+{Legifrance}.
+\newblock Code général des impôts, article 990 i, 2025{\natexlab{b}}.
+
+\bibitem[{L'Échiquier}(2019)]{lechiquier_2019}
+{L'Échiquier}.
+\newblock La fiscalité du compte-titres et de l'assurance-vie en cas de décès, 2019.
+
+\end{thebibliography}
