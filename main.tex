@@ -1,8 +1,9 @@
 \documentclass[a4paper, 11pt]{article}
 
 % --- PACKAGES ---
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+\usepackage{fontspec} % AJOUTÉ : Pour gérer les polices TTF/OTF. Remplace inputenc et fontenc.
+%\usepackage[utf8]{inputenc} % Supprimé car incompatible avec fontspec
+%\usepackage[T1]{fontenc} % Supprimé car incompatible avec fontspec
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage[french]{babel}
@@ -13,15 +14,54 @@
 \usepackage{xcolor}
 \usepackage{sectsty}
 \usepackage{float}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{fancyhdr} 
 
+% --- FONT CONFIGURATION (OBLIGATOIREMENT APRÈS fontspec) ---
+% Définit la police Outfit. Assurez-vous que les fichiers de police (ex: Outfit-Regular.ttf)
+% sont bien dans le dossier 'Outfit' et que vous compilez avec XeLaTeX ou LuaLaTeX.
+\setmainfont[
+    Path=outfit/,
+    Extension=.ttf, % Si tous vos fichiers sont .ttf
+    UprightFont=*Regular, % Ex: cherche Outfit-Regular.ttf
+    BoldFont=*Bold,       % Ex: cherche Outfit-Bold.ttf
+]{outfit}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
 % --- CONFIGURATION ---
 \geometry{a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
 \graphicspath{ {./src/images/} }
+
+% --- FANCYHDR CONFIGURATION ---
+\pagestyle{fancy}
+\fancyhf{} % Efface les en-têtes/pieds de page par défaut
+\renewcommand{\headrulewidth}{0.4pt} 
+\renewcommand{\footrulewidth}{0.4pt} 
+
+% En-tête : Logo à gauche, Nom de la section à droite
+\fancyhead[L]{\includegraphics[height=12pt]{logo.png}} % AJOUTÉ : Logo CAYAS
+\fancyhead[R]{\slshape \rightmark} % Nom de la section actuelle
+
+% Pied de page : CAYAS et numéro de page
+\fancyfoot[C]{\textbf{CAYAS} | Page \thepage} 
+
+% Style plain (pour la Table des Matières et le Tableau)
+\fancypagestyle{plain}{
+  \fancyhead[L]{\includegraphics[height=12pt]{logo.png}} % On garde le logo sur la page plain
+  \fancyhead[R]{} % En-tête droit vide
+  \fancyfoot[C]{\textbf{CAYAS} | Page \thepage} 
+  \renewcommand{\headrulewidth}{0.4pt} % Ligne d'en-tête conservée pour le style épuré
+  \renewcommand{\footrulewidth}{0.4pt}
+}
 
 % --- COLORS ---
 \definecolor{Fushia}{HTML}{ed1e79}
 \definecolor{FlashGreen}{HTML}{7cfa72}
 \definecolor{NeonBlue}{HTML}{75fafc}
+\definecolor{HeaderGray}{HTML}{F2F2F2}
+\definecolor{LightFushia}{HTML}{FBE0EC}
 
 \hypersetup{colorlinks=false}
 
@@ -29,29 +69,46 @@
 \subsectionfont{\color{black}}
 \subsubsectionfont{\color{black}}
 
-% Légendes homogènes (petite taille, étiquette en gras, centrées)
+% Légendes homogènes
 \captionsetup{justification=centering}
 
 \title{\textbf{Comparaison fiscale AV vs CTO}}
 \author{CAYAS}
-\date{\today}
+\date{} 
 
 % --- DOCUMENT ---
 \begin{document}
 
-\begin{titlepage}
-    \centering
-    \vfill
-    \includegraphics[width=0.4\textwidth]{logo.png}\par\vspace{1cm}
-    {\Huge\bfseries Comparaison fiscale AV vs CTO \par}
-    \vspace{1cm}
-    {\Large CAYAS \par}
-    \vfill
-    {\large \today \par}
-\end{titlepage}
+% --- TABLEAU SYNTHÉTIQUE DES CONCLUSIONS (PAGE 2) ---
+\pagestyle{plain} % Active le style "plain" (avec logo et pied de page)
 
+\begin{table}[h!]
+    \caption{\textbf{Tableau synthétique des conclusions de l'étude}}
+    \label{tab:synthese}
+    \centering
+    \setlength{\tabcolsep}{6pt}
+    \renewcommand{\arraystretch}{1.5}
+
+    \begin{tabular}{p{3cm}p{10cm}} 
+        \toprule 
+        \rowcolor{HeaderGray} \textbf{Critère} & \textbf{Conclusion principale} \\
+        \midrule 
+        \rowcolor{white} Ligne directe & Le compte-titres ordinaire (CTO) est généralement plus favorable. La neutralisation des plus-values latentes au décès et l’absence de frais récurrents surpassent l’avantage limité de l’assurance-vie, surtout à long terme et pour des patrimoines conséquents. \\
+        \rowcolor{LightFushia} Ligne indirecte & L’assurance-vie garde un avantage net grâce à son abattement spécifique (152 500 €) et à ses taux réduits (20–31,25 \%), contrairement au CTO soumis à 55–60 \%, même si pour un épargnant, souhaitant transmettre hors ligne directe, ayant un horizon de placement très long terme ($> 40$ ans), que l’enveloppe a des frais élevés ($> 1$\%) ou un rendement annuel élevé ($> 7$\%/an), le CTO retrouverait alors l’avantage, malgré le barême du régime général. \\
+        \rowcolor{white} Rôle du rendement & Plus le rendement attendu est élevé, moins compétitive devient l’assurance-vie. La différence relative avec le CTO s’accroît en effet avec le rendement, car les prélèvements sociaux et les frais de gestion grèvent les performances de l’assurance-vie lors de la succession. \\
+        \rowcolor{LightFushia} Rôle des frais & Les frais de gestion constituent le facteur déterminant. Seuls des contrats avec des frais inférieurs à 0,25 \%/an permettraient à l’assurance-vie de surpasser durablement le CTO — un scénario irréaliste au regard des frais moyens observés (Rapport annuel 2025 de l’Observatoire des produits d’épargne financière 2025). \\
+        \bottomrule 
+    \end{tabular}
+\end{table}
+
+\newpage 
+
+% --- TABLE OF CONTENTS ---
 \tableofcontents
 \newpage
+
+% --- START OF FANCY PAGES ---
+\pagestyle{fancy} % Active le style "fancy" (avec titre de section à droite)
 
 % --- SECTIONS ---
 
@@ -77,16 +134,17 @@
 \input{src/simulations_numeriques_sans_retrait/transmission_indirecte.tex}
 \input{src/simulations_numeriques_sans_retrait/analyses_de_sensibilite.tex}
 
-%\section{Simulations numériques avec retrait annuel}
-%\label{sec:simulations_avec_retrait}
-%\input{src/simulations_numeriques_avec_retrait_annuel/cadre_methodologique.tex}
-%\input{src/simulations_numeriques_avec_retrait_annuel/scenarios_et_parametres.tex}
+% Ajoutez ici la section 4 si vous souhaitez intégrer le contenu complet :
+% \section{Simulations numériques avec retrait annuel}
+% \label{sec:simulations_avec_retrait}
+% \input{src/simulations_numeriques_avec_retrait/retrait_annuel.tex}
 
+
+\section{Conclusion générale}
+%\label{sec:conclusion}
 \input{src/conclusion_generale/conclusion.tex}
 
-
-% --- BIBLIOGRAPHY ---
-\bibliographystyle{plainnat}
-\bibliography{references}
+\bibliographystyle{apalike-fr}
+\bibliography{biblio}
 
 \end{document}
