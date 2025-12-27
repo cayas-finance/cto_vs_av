@@ -65,7 +65,8 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         abattement_av = 152_500
         bareme_av = [(700_000, 0.20), (float("inf"), 0.3125)]
     else:
-        abattement_av = 30_500
+        # Régime 757 B : 30 500 € pour l'ensemble des bénéficiaires
+        abattement_av = 30_500 / max(1, inputs.nb_beneficiaires)
         bareme_av = [(float("inf"), 0.0)]
 
     abattement_fiscal_av_total = abattement_av * inputs.nb_beneficiaires
@@ -77,16 +78,61 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         inputs.frais_gestion_av,
         inputs.frais_sociaux_av,
         abattement_fiscal_av_total,
+        abattement_fiscal_av_total,
         bareme_av,
+        versement_apres_70=(not inputs.versements_av_avant70)
     )
     heritage_av = av_result.heritage_net
     capital_final_av = av_result.capital_final
     prelevements_sociaux_av = av_result.prelevements_sociaux
     droits_av = av_result.droits_av
 
-    base_autres_biens_av = max(0.0, inputs.autres_biens_valeur - abattement_succession_total)
-    droits_autres_biens_av = calcul_impot_progressif(base_autres_biens_av, bareme_succession)
-    heritage_autres_av = inputs.autres_biens_valeur - droits_autres_biens_av
+    # Calcul des droits sur "Autres Biens + Part Taxable AV (757B)"
+    base_taxable_av_scenario = inputs.autres_biens_valeur + getattr(av_result, 'montant_soumis_succession', 0.0)
+    base_imposable_av_scenario = max(0.0, base_taxable_av_scenario - abattement_succession_total)
+    
+    droits_succession_scenario_av = calcul_impot_progressif(base_imposable_av_scenario, bareme_succession)
+    
+    # Répartition des droits (optionnel, pour l'affichage) :
+    # On peut considérer que les droits sur "autres biens" sont la part proratisée, ou le marginal.
+    # Ici, simplifions : heritage_autres_av = Autres_Biens - (Droits_Totaux - Part_Du_Au_AV)
+    # Ou plus simple : Heritage_Total = (Net_AV + Autres_Biens) - Droits_Totaux_Scenario
+    
+    # Pour garder la structure actuelle :
+    heritage_total_av = (heritage_av + inputs.autres_biens_valeur) - droits_succession_scenario_av
+    
+    # On déduit les droits "attribués" aux autres biens par différence avec le net AV (qui est déjà net de droits AV spécifiques mais brut de droits succession 757B)
+    # Attention: heritage_av calculé par la fonction est net de 990I, mais brut de 757B.
+    # Donc heritage_av (poche AV) doit payer sa part de droits succ.
+    
+    # Approche plus robuste :
+    # Droits Totaux Scenario AV = droits_succession_scenario_av + droits_av (990I)
+    impots_total_av = droits_succession_scenario_av + droits_av + prelevements_sociaux_av
+    
+    # On recalcule heritage_autres_av comme le reliquat pour que l'addition retombe juste ?
+    # Non, restons cohérents avec ComparisonResult.
+    
+    # Disons que :
+    # heritage_autres_av = valeur_autres - part_droits_autres
+    # heritage_av_final = heritage_av_intermediaire - part_droits_av_757b
+    
+    # Pour faire simple et juste :
+    patrimoine_total_av_brut = capital_final_av + inputs.autres_biens_valeur
+    
+    # Droits supportés par la part AV dans la succession (règle de trois sur l'assiette taxable ?)
+    part_av_dans_assiette = 0.0
+    if base_imposable_av_scenario > 0:
+        part_av_dans_assiette = getattr(av_result, 'montant_soumis_succession', 0.0) / base_taxable_av_scenario
+        
+    droits_imputes_av_757b = droits_succession_scenario_av * part_av_dans_assiette
+    droits_imputes_autres = droits_succession_scenario_av - droits_imputes_av_757b
+    
+    heritage_av_net_net = heritage_av - droits_imputes_av_757b
+    heritage_autres_av = inputs.autres_biens_valeur - droits_imputes_autres
+    
+    # Override de heritage_av pour le résultat final
+    heritage_av = heritage_av_net_net
+
     heritage_total_av = heritage_av + heritage_autres_av
     patrimoine_total_av = capital_final_av + inputs.autres_biens_valeur
 
@@ -109,8 +155,8 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
     heritage_autres_cto = inputs.autres_biens_valeur - droits_autres_cto
     heritage_total_cto = heritage_cto + heritage_autres_cto
 
-    impots_support_av = prelevements_sociaux_av + droits_av
-    impots_autres_av = droits_autres_biens_av
+    impots_support_av = prelevements_sociaux_av + droits_av + droits_imputes_av_757b
+    impots_autres_av = droits_imputes_autres
     impots_support_cto = droits_cto
     impots_autres_cto = droits_autres_cto
     impots_total_av = impots_support_av + impots_autres_av
@@ -128,8 +174,8 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         "abattement_av_unitaire": abattement_av,
         "abattement_av_total": abattement_fiscal_av_total,
         "prelevements_sociaux_av": prelevements_sociaux_av,
-        "droits_sur_assurance_vie": droits_av,
-        "droits_autres_biens_scenario_av": droits_autres_biens_av,
+        "droits_sur_assurance_vie": droits_av + droits_imputes_av_757b,
+        "droits_autres_biens_scenario_av": droits_imputes_autres,
         "droits_totaux_scenario_cto": droits_totaux_cto,
         "droits_cto": droits_cto,
         "droits_autres_biens_scenario_cto": droits_autres_cto,
@@ -146,9 +192,11 @@ def compute_comparison(inputs: ScenarioInputs) -> Tuple[ComparisonResult, dict]:
         capital_final_cto=capital_final_cto,
         patrimoine_total_av=patrimoine_total_av,
         patrimoine_total_cto=actif_total_cto,
-        part_taxable_av=base_autres_biens_av,
+        part_taxable_av=base_imposable_av_scenario,
         part_taxable_cto=base_imposable_totale,
-        impots_payes_av=impots_total_av,
+        impots_payes_av=impots_total_av,  # PS inclus ? Non, impots_total_av defini plus haut comme: droits_scenario + droits_av (990I) + PS?
+        # Check definition ligne 116: impots_total_av = impots_support_av + impots_autres_av 
+        # Et impots_support_av contient PS + droits. Donc OK.
         impots_payes_cto=impots_total_cto,
         impots_support_av=impots_support_av,
         impots_autres_av=impots_autres_av,

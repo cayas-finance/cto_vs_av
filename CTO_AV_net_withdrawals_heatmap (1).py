@@ -229,17 +229,19 @@ def simulate_cto_net(
 # ---------- Droits de succession en fin d'horizon ----------
 
 def heritage_net_assurance_vie(
+    capital_initial_verse: float,
     capital_final_av: float,
     gains_restants_av: float,
     nb_beneficiaires: int,
     versements_av_avant70: bool
 ):
-    # même hypothèse simplificatrice : PS sur gains restants, puis régime décès AV
+    # retourne (heritage_net_av_hors_757b, montant_soumis_succession_757b)
     if versements_av_avant70:
         abattement_av_par_benef = 152_500
         bareme_av = [(700_000, 0.20), (float("inf"), 0.3125)]
     else:
-        abattement_av_par_benef = 30_500
+        # 757B
+        abattement_av_par_benef = 30_500 / max(1, nb_beneficiaires)
         bareme_av = [(float("inf"), 0.0)]
 
     taux_ps = 0.172
@@ -248,7 +250,18 @@ def heritage_net_assurance_vie(
     abattement_total = abattement_av_par_benef * nb_beneficiaires
     base = max(0.0, capital_apres_ps - abattement_total)
     droits_av = calcul_impot_progressif(base, bareme_av)
-    return capital_apres_ps - droits_av
+    
+    net_av = capital_apres_ps - droits_av
+    
+    montant_soumis_succ = 0.0
+    if not versements_av_avant70:
+        # On suppose abattement global de 30 500 deja reparti ou non utilisé ?
+        # Dans ce script, "abattement_av_par_benef" est déjà 30500/N.
+        # Donc abattement_total = 30500.
+        # Assiette 757B = Primes - 30500.
+        montant_soumis_succ = max(0.0, capital_initial_verse - abattement_total)
+        
+    return net_av, montant_soumis_succ
 
 def heritage_net_cto(
     capital_final_cto: float,
@@ -305,12 +318,28 @@ def heatmap_diff_frais_vs_duree(
             av_res = simulate_av_net(capital_initial, rendement_fixe, y, net_annuel, av_tax_i)
             cto_res = simulate_cto_net(capital_initial, rendement_fixe, y, net_annuel, cto_tax)
 
-            av_herit = heritage_net_assurance_vie(
+            av_net_hors_succ, montnt_soumis = heritage_net_assurance_vie(
+                capital_initial,
                 av_res["valeur_finale"],
                 av_res["gains_restants"],
                 nb_beneficiaires,
                 versements_av_avant70
             )
+            
+            # Calcul droits marginaux
+            impot_margin = 0.0
+            if montnt_soumis > 0:
+                abattement_par_heritier, bareme_succession = get_regime_successoral(lien)
+                abattement_succession_total = abattement_par_heritier * nb_heriters
+                
+                base_autres = max(0.0, autres_biens_valeur - abattement_succession_total)
+                d1 = calcul_impot_progressif(base_autres, bareme_succession)
+                
+                base_tot = max(0.0, autres_biens_valeur + montnt_soumis - abattement_succession_total)
+                d2 = calcul_impot_progressif(base_tot, bareme_succession)
+                impot_margin = d2 - d1
+            
+            av_herit = av_net_hors_succ - impot_margin
             cto_herit = heritage_net_cto(
                 cto_res["valeur_finale"],
                 autres_biens_valeur,
@@ -374,12 +403,26 @@ def heatmap_diff_rendement_vs_duree(
             av_res = simulate_av_net(capital_initial, r, y, net_annuel, av_tax_i)
             cto_res = simulate_cto_net(capital_initial, r, y, net_annuel, cto_tax)
 
-            av_herit = heritage_net_assurance_vie(
+            av_net_hors_succ, montnt_soumis = heritage_net_assurance_vie(
+                capital_initial,
                 av_res["valeur_finale"],
                 av_res["gains_restants"],
                 nb_beneficiaires,
                 versements_av_avant70
             )
+            
+            impot_margin = 0.0
+            if montnt_soumis > 0:
+                abattement_par_heritier, bareme_succession = get_regime_successoral(lien)
+                abattement_succession_total = abattement_par_heritier * nb_heriters
+                
+                base_autres = max(0.0, autres_biens_valeur - abattement_succession_total)
+                d1 = calcul_impot_progressif(base_autres, bareme_succession)
+                base_tot = max(0.0, autres_biens_valeur + montnt_soumis - abattement_succession_total)
+                d2 = calcul_impot_progressif(base_tot, bareme_succession)
+                impot_margin = d2 - d1
+                
+            av_herit = av_net_hors_succ - impot_margin
             cto_herit = heritage_net_cto(
                 cto_res["valeur_finale"],
                 autres_biens_valeur,
@@ -439,10 +482,26 @@ def combined_heatmaps(
         )
         av_res = simulate_av_net(capital_initial, rendement, years, net_annuel, av_tax_i)
         cto_res = simulate_cto_net(capital_initial, rendement, years, net_annuel, cto_tax)
-        av_herit = heritage_net_assurance_vie(
+        av_net_hors_succ, montnt_soumis = heritage_net_assurance_vie(
+            capital_initial,
             av_res["valeur_finale"], av_res["gains_restants"],
             nb_beneficiaires, versements_av_avant70
         )
+        
+        impot_margin = 0.0
+        if montnt_soumis > 0:
+            abattement_par_heritier, bareme_succession = get_regime_successoral(lien)
+            abattement_succession_total = abattement_par_heritier * nb_heriters
+            
+            # Recalculer droits sur autres biens ici ?
+            # Oui car 'combined_heatmaps' n'a pas accès aux scopes extérieurs proprement
+            base_autres = max(0.0, autres_biens_valeur - abattement_succession_total)
+            d1 = calcul_impot_progressif(base_autres, bareme_succession)
+            base_tot = max(0.0, autres_biens_valeur + montnt_soumis - abattement_succession_total)
+            d2 = calcul_impot_progressif(base_tot, bareme_succession)
+            impot_margin = d2 - d1
+            
+        av_herit = av_net_hors_succ - impot_margin
         cto_herit = heritage_net_cto(
             cto_res["valeur_finale"], autres_biens_valeur, nb_heriters, lien
         )
@@ -499,7 +558,8 @@ def combined_heatmaps(
     cbar.set_label("Différence relative d'héritage net\n(AV - CTO) / (CTO + autres biens)" if relatif else "Différence absolue d'héritage net (AV - CTO)")
 
     plt.tight_layout(rect=[0, 0, 0.9, 1])
-    plt.show()
+    plt.savefig('heatmap_result.png')
+    print("Heatmap saved to heatmap_result.png")
 
     return Z_frais, Z_rend
 

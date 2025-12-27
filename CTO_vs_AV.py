@@ -63,7 +63,7 @@ def get_regime_successoral(lien: str):
         # Frères / soeurs
         abattement = 15_932
         bareme = [
-            (244_430, 0.35),
+            (24_430, 0.35),
             (np.inf,  0.45),
         ]
     elif lien in ("neveu_niece", "neveu-nièce", "neveu", "nièce", "niece"):
@@ -83,7 +83,11 @@ class AssuranceVieResult:
     heritage_net: float
     capital_final: float
     prelevements_sociaux: float
+    heritage_net: float
+    capital_final: float
+    prelevements_sociaux: float
     droits_av: float
+    montant_soumis_succession: float = 0.0
 
 
 @dataclass
@@ -97,7 +101,8 @@ class CTOResult:
 # ---------- Assurance-vie ----------
 def calculer_heritage_assurance_vie(
     capital_initial, annee, rendement, frais_gestion, frais_sociaux,
-    abattement_fiscal_av_total, bareme_av
+    abattement_fiscal_av_total, bareme_av,
+    versement_apres_70: bool = False
 ) -> AssuranceVieResult:
     """Calcule les montants nets et l'impôt appliqués au contrat d'assurance-vie."""
     rendement_net = rendement - frais_gestion
@@ -113,11 +118,23 @@ def calculer_heritage_assurance_vie(
     droits_av = calcul_impot_progressif(base_imposable_av, bareme_av)
 
     heritage_net = capital_apres_ps - droits_av
+    heritage_net = capital_apres_ps - droits_av
+    
+    montant_soumis_succession = 0.0
+    if versement_apres_70:
+        # Régime 757B : les primes versées (capital_initial) moins l'abattement (30 500 total)
+        # sont soumises aux droits de succession.
+        # Attention, l'abattement de 30 500 est global. Ici on suppose que 'abattement_fiscal_av_total'
+        # contient la part d'abattement allouée à ce contrat/bénéficiaire.
+        # Si c'est le seul contrat, c'est 30 500.
+        montant_soumis_succession = max(0.0, capital_initial - abattement_fiscal_av_total)
+
     return AssuranceVieResult(
         heritage_net=heritage_net,
         capital_final=capital_final,
         prelevements_sociaux=prelevements_sociaux,
         droits_av=droits_av,
+        montant_soumis_succession=montant_soumis_succession
     )
 
 
@@ -174,7 +191,12 @@ def simuler_et_tracer(
         abattement_av_par_benef = 152_500
         bareme_av = [(700_000, 0.20), (np.inf, 0.3125)]
     else:
-        abattement_av_par_benef = 30_500
+        # Régime 757 B (> 70 ans)
+        # L'abattement de 30 500 est global (tous bénéficiaires).
+        # Ici on simplifie en le répartissant ou en l'appliquant globalement si 1 seul bénéficiaire simulé.
+        abattement_av_par_benef = 30_500 / max(1, nb_beneficiaires)
+        
+        # Pour le calcul des droits SPECIFIQUES AV (990 I), le barème est 0% car ce n'est pas ce prélèvement qui s'applique.
         bareme_av = [(np.inf, 0.0)]
 
     abattement_fiscal_av_total = abattement_av_par_benef * nb_beneficiaires
@@ -194,8 +216,27 @@ def simuler_et_tracer(
         for j in range(resolution):
             av_result = calculer_heritage_assurance_vie(
                 capital_initial, annees[j], rendement_fixe, frais_gestion[i], frais_sociaux_av,
-                abattement_fiscal_av_total, bareme_av
+                abattement_fiscal_av_total, bareme_av,
+                versement_apres_70=(not versements_av_avant70)
             )
+            
+            # Correction succession AV > 70 ans :
+            # Si montant_soumis_succession > 0, il faut calculer l'impôt de succession marginal qu'il génère
+            # en s'ajoutant aux "autres biens".
+            impot_succession_marginal_av = 0.0
+            if av_result.montant_soumis_succession > 0:
+                # 1. Droits sur les autres biens seuls
+                base_autres = max(0.0, autres_biens_valeur - abattement_succession_total)
+                droits_autres = calcul_impot_progressif(base_autres, bareme_succession)
+                
+                # 2. Droits sur (autres biens + part taxable AV)
+                base_totale_av = max(0.0, autres_biens_valeur + av_result.montant_soumis_succession - abattement_succession_total)
+                droits_totaux_av_scenario = calcul_impot_progressif(base_totale_av, bareme_succession)
+                
+                # 3. Impôt imputable à l'AV
+                impot_succession_marginal_av = droits_totaux_av_scenario - droits_autres
+            
+            av_net_real = av_result.heritage_net - impot_succession_marginal_av
             cto_result = calculer_heritage_cto(
                 capital_initial, annees[j], rendement_fixe,
                 autres_biens_valeur,
@@ -205,9 +246,9 @@ def simuler_et_tracer(
             base_totale = cto_result.capital_final + autres_biens_valeur
             if relatif:
                 # éviter /0 : si base_totale=0 on met 0 (ou np.nan si tu préfères)
-                diff_heritage1[i, j] = 0.0 if base_totale <= 0 else (av_result.heritage_net - cto_result.heritage_net) / base_totale
+                diff_heritage1[i, j] = 0.0 if base_totale <= 0 else (av_net_real - cto_result.heritage_net) / base_totale
             else:
-                diff_heritage1[i, j] = av_result.heritage_net - cto_result.heritage_net
+                diff_heritage1[i, j] = av_net_real - cto_result.heritage_net
 
     # --- Heatmap Rendement vs Durée (frais fixes) ---
     diff_heritage2 = np.zeros((resolution, resolution))
@@ -215,8 +256,19 @@ def simuler_et_tracer(
         for j in range(resolution):
             av_result = calculer_heritage_assurance_vie(
                 capital_initial, annees[j], rendements[i], frais_av_fixe, frais_sociaux_av,
-                abattement_fiscal_av_total, bareme_av
+                abattement_fiscal_av_total, bareme_av,
+                versement_apres_70=(not versements_av_avant70)
             )
+            
+            impot_succession_marginal_av = 0.0
+            if av_result.montant_soumis_succession > 0:
+                base_autres = max(0.0, autres_biens_valeur - abattement_succession_total)
+                droits_autres = calcul_impot_progressif(base_autres, bareme_succession)
+                base_totale_av = max(0.0, autres_biens_valeur + av_result.montant_soumis_succession - abattement_succession_total)
+                droits_totaux_av_scenario = calcul_impot_progressif(base_totale_av, bareme_succession)
+                impot_succession_marginal_av = droits_totaux_av_scenario - droits_autres
+
+            av_net_real = av_result.heritage_net - impot_succession_marginal_av
             cto_result = calculer_heritage_cto(
                 capital_initial, annees[j], rendements[i],
                 autres_biens_valeur,
@@ -225,9 +277,9 @@ def simuler_et_tracer(
             )
             base_totale = cto_result.capital_final + autres_biens_valeur
             if relatif:
-                diff_heritage2[i, j] = 0.0 if base_totale <= 0 else (av_result.heritage_net - cto_result.heritage_net) / base_totale
+                diff_heritage2[i, j] = 0.0 if base_totale <= 0 else (av_net_real - cto_result.heritage_net) / base_totale
             else:
-                diff_heritage2[i, j] = av_result.heritage_net - cto_result.heritage_net
+                diff_heritage2[i, j] = av_net_real - cto_result.heritage_net
 
     # --- Harmonisation de l'échelle & tracé ---
     # bornes communes (ignorer d'éventuels NaN)

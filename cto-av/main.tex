@@ -5,7 +5,8 @@
 %\usepackage[utf8]{inputenc} % Supprimé car incompatible avec fontspec
 %\usepackage[T1]{fontenc} % Supprimé car incompatible avec fontspec
 \usepackage{graphicx}
-\usepackage{amsmath}
+%\usepackage{amsmath}
+\usepackage{unicode-math}
 \usepackage[french]{babel}
 \usepackage{geometry}
 \usepackage[hidelinks]{hyperref}
@@ -24,13 +25,24 @@
 \setmainfont[
     Path=outfit/,
     Extension=.ttf, % Si tous vos fichiers sont .ttf
-    UprightFont=*Regular, % Ex: cherche Outfit-Regular.ttf
+    UprightFont=*ExtraLight, % Ex: cherche Outfit-Regular.ttf
     BoldFont=*Bold,       % Ex: cherche Outfit-Bold.ttf
+    Numbers=Lining
 ]{outfit}
+
+\setmathfont{Latin Modern Math} 
+\setmathfont[
+    % Utilise la police textuelle pour le style des chiffres (Lining)
+    Numbers={Lining},
+    % Force les chiffres droits dans les maths à utiliser la police définie par \setmainfont
+    % Cela devrait résoudre le conflit visuel.
+    upright={outfit} 
+]{Latin Modern Math}
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
 % --- CONFIGURATION ---
+\setlength{\headheight}{16.08003pt}
 \geometry{a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
 \graphicspath{ {./src/images/} }
 
@@ -124,7 +136,6 @@
 \input{src/analyse_comparative/notations_et_hypotheses.tex}
 \input{src/analyse_comparative/formulation_des_droits_de_succession.tex}
 \input{src/analyse_comparative/difference_heritage_net.tex}
-\input{src/analyse_comparative/cas_limites.tex}
 
 \section{Simulations numériques sans retrait}
 \label{sec:simulations_sans_retrait}
