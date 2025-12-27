@@ -1,0 +1,33 @@
+\subsection{Compte-Titres Ordinaire (CTO)}
+\label{sec:cto}
+
+Le CTO, contrairement à l'assurance-vie, ne bénéficie d'aucun régime fiscal spécifique en matière successorale, le CTO intègre donc l'ensemble du patrimoine du défunt. Toutefois, il présente une caractéristique importante : l'effacement des plus-values latentes au décès, ce qui confère un avantage aux héritiers \cite{lechiquier_2019}.
+
+\subsubsection{Évolution du capital}
+\label{sec:cto_evolution_capital}
+
+En France, la quasi-totalité des instruments financiers de placement (actions, obligations, OPCVM, ETF, etc.) peuvent être détenus au sein d'un compte-titres ordinaire. Pour établir une comparaison rigoureuse entre enveloppes, nous considérons le cas où l'épargnant investit dans les mêmes produits financiers, qu'ils soient logés dans une assurance-vie ou dans un CTO.
+
+Dans cette perspective, les frais propres aux instruments sous-jacents — par exemple les frais de gestion d'un ETF de l'ordre de 0,1 à 0,2\% par an — sont identiques quelle que soit l'enveloppe. Ils n'ont donc pas à être distingués dans l'analyse, et seuls les frais liés à l'enveloppe elle-même (frais de gestion de l'assurance-vie, prélèvements sociaux, fiscalité successorale) sont déterminants.
+
+En l'absence de frais spécifiques, l'évolution du capital investi sur un CTO suit une croissance composée simple :
+\begin{equation}
+    C_n = C_0(1+r)^n,
+\end{equation}
+où \(C_0\) désigne le capital initial, \(r\) le rendement annuel (intégrant les frais de l'instrument financier), et \(C_n\) la valeur atteinte après \(n\) années de détention.
+
+\subsubsection{Base taxable et barème successoral}
+\label{sec:cto_base_taxable}
+
+La base imposable se calcule comme suit :
+\begin{equation}
+    \text{Base} = C_n + \text{Autres biens} - A_s,
+\end{equation}
+où \(A_s\) représente l'abattement légal (100 000 € par héritier en ligne directe en 2025) \cite{cgi_990i, cgi_757b}.
+
+Le barème successoral en ligne directe est appliqué tranche par tranche \cite{bofip_droits_mutation_general}: 5\%, 10\%, 15\%, 20\%, 30\%, 40\%, et 45\% au-delà de 1,8 million d'euros.
+
+L'héritage net transmis par un CTO s'écrit alors :
+\begin{equation}
+    H_{CTO} = C_n - \text{Droits}_{CTO} \cdot \frac{C_n}{C_n + \text{Autres biens}}.
+\end{equation}

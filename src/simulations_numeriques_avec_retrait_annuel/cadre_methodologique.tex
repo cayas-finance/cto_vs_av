@@ -1,0 +1,14 @@
+\subsection{Cadre méthodologique}
+\label{sec:methodologie_avec_retrait}
+
+On considère un capital initial \(C_0\), un horizon de détention \(n\), et un rendement annuel brut \(r\). Les frais de gestion de l'assurance-vie sont notés \(f_g\). Les prélèvements sociaux sont au taux \(t_{ps}\).
+
+Un retrait annuel est programmé selon une règle déterministe, un retrait nominal constant \(A\) net de fiscalité, prélevé en fin d'année.
+
+\paragraph{Chronologie intra-annuelle.} À chaque année \(t \in \{1, ..., n\}\) :
+\begin{enumerate}
+    \item capitalisation du support : \(C'_{t} = C_{t-1}(1 + r)\) pour le CTO, \(C'_{t} = C_{t-1}(1 + r - f_g)\) pour l'AV;
+    \item retrait \(A\);
+    \item sur assurance-vie, détermination de la fraction imposable du retrait selon la règle proportionnelle des gains latents.
+    \item sur le CTO, taxe selon la PV latente.
+\end{enumerate}

@@ -1,0 +1,34 @@
+\subsection{Scénarios et paramètres}
+\label{sec:scenarios_avec_retrait}
+
+\paragraph{Règle proportionnelle des gains lors d'un rachat partiel (assurance-vie).} Si \(V_t\) désigne la valeur de rachat avant retrait et \(P_t\) le cumul des primes nettes non encore « restituées », la part de gains comprise dans un retrait \(R_t\) est donnée par
+\begin{equation}
+    G_t = R_t \times \frac{\max(V_t - P_t, 0)}{V_t}
+\end{equation}
+La base imposable sur le revenu est \(G_t\) (avec régime avant/après huit ans et prise en compte d'un éventuel abattement annuel). Les prélèvements sociaux s'appliquent sur \(G_t\) au taux \(t_{ps}\). Après le retrait, on met à jour \(P_t\) en retranchant la part en capital restituée. Les simulations retiennent la législation en vigueur : application du PFU ou du barème selon les cas, abattement sur les gains (nous considérons toujours le cas d'un contrat de plus de 8 ans) et prélèvements sociaux au taux en vigueur. L'ensemble des hypothèses fiscales est harmonisé avec la section comparative et la section sans retrait.
+
+On retient les mêmes ordres de grandeur que dans la section consacrée aux trajectoires sans retrait, afin de permettre une comparaison directe :
+\begin{itemize}
+    \item capital initial de 100 000 euros;
+    \item deux masses patrimoniales hors enveloppes : 1 000 000 euros et 300 000 euros;
+    \item grilles de frais et de rendements alignées sur les figures de la section précédente;
+    \item politique de retrait nominal constant \(A = 5000\) euros par an;
+\end{itemize}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{images/figure7.png}
+    \caption{Différence relative d'héritage net, définie par \((H_{AV} - H_{CTO})/(CTO + \text{autres biens})\), en présence d'un retrait annuel nominal de 5000 euros et de 300 000 euros de capital hors enveloppes. À gauche, impact des frais de gestion de l'assurance-vie pour un rendement fixé à 4,5 \% l'an. À droite, impact du rendement pour des frais fixes de 0,5 \% l'an. Les valeurs positives indiquent un avantage de l'assurance-vie, les valeurs négatives un avantage du CTO.}
+    \label{fig:sim7}
+\end{figure}
+
+Le panneau de gauche de la figure \ref{fig:sim7} met en évidence qu'à horizons longs, l'augmentation des frais de gestion érode rapidement l'avantage relatif de l'assurance-vie sous retraits récurrents. La carte de droite montre qu'à frais constants, l'amélioration du rendement reporte la frontière de neutralité en faveur du CTO lorsque la durée s'allonge, l'exonération des plus-values au décès jouant un rôle déterminant. Nous remarquons ensuite deux zones d'intérêt, la première sur le paneau de gauche dans le cas où les frais d'enveloppe sont strictement inférieure à 0.25\%, dans ce cas, à très long terme l'assurance vie gagne en intérêt face au CTO, mais cette hypothèse n'est pas réaliste dans le contexte français actuel. La deuxième zone d'intérêt se trouve dans les deux panneaux, dans un nombre significatif de configurations, l'épargne est intégralement consommée avant l'horizon considéré, ce qui explique les zones blanches ou discontinuités observées dans les figures.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{images/figure8.png}
+    \caption{Différence relative d'héritage net, définie par \((H_{AV} - H_{CTO})/(CTO + \text{autres biens})\), en présence d'un retrait annuel nominal de 5000 euros. À gauche, impact des frais de gestion de l'assurance-vie pour un rendement fixé à 4,5\% l'an. À droite, impact du rendement pour des frais fixes de 0,5\% l'an. Les valeurs positives indiquent un avantage de l'assurance-vie, les valeurs négatives un avantage du CTO.}
+    \label{fig:sim8}
+\end{figure}
+
+Nous remarquons ici que l'avantage de fiscalité lors des retraits de l'assurance vie, ne permet pas non plus de combler l'écart de fiscalité démontré dans la section 3. Ce résultat n'est finalement pas surprenant puisque l'avantage fiscal, bien qu'optimisé dans cette situation, ne revient qu'à économiser 5.3\% d'impôt sur les plus values. Ce montant annuel est faible et n'arrive pas à compenser les coûts de cette enveloppe et l'abscence de purge des plus values.

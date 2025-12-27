@@ -1,0 +1,47 @@
+\subsection{Assurance-vie}
+\label{sec:assurance_vie}
+
+L'assurance-vie bénéficie d'un régime fiscal dérogatoire qui s'applique aussi bien pendant la phase d'épargne qu'au moment de la transmission \cite{cgi_990i, cgi_757b, bofip_mutations_av}.
+
+\subsubsection{Rendement et prélèvements sociaux en cours de vie}
+\label{sec:rendement_prelevements}
+
+Soit \(C_0\) le capital initial investi, \(r\) le rendement brut annuel, et \(f_g\) les frais de gestion. Le rendement net s'écrit:
+\begin{equation}
+    r_{\text{net}} = r - f_g.
+\end{equation}
+L'évolution du capital après \(n\) années est donnée par :
+\begin{equation}
+    C_n = C_0(1+r_{\text{net}})^n.
+\end{equation}
+La plus-value réalisée, \(\Delta = C_n - C_0\), est soumise aux prélèvements sociaux au taux \(t_{ps}\) (actuellement 17,2\%) \cite{bofip_ps_av}:
+\begin{equation}
+    PS = \max(0, \Delta) \cdot t_{ps}.
+\end{equation}
+
+\subsubsection{Rachats partiels et fiscalité de l'épargne}
+\label{sec:rachats_partiels}
+
+Lors d'un rachat partiel, seule la fraction des gains comprise dans le retrait est imposable. On obtient la formule :
+\begin{equation}
+    \text{Gain imposable} = \text{Montant retiré} \times \frac{\text{Gains latents du contrat}}{\text{Valeur de rachat du contrat}}
+\end{equation}
+
+\paragraph{Rachats partiels récurrents (chaque année).} La réalisation de rachats annuels, après huit années de détention, permet d'optimiser l'abattement de 4600 € pour une personne seule ou 9200 € pour un couple, les prélèvements sociaux demeurant dus sur la part des gains \cite{cgi_990i, cgi_757b}.
+
+\paragraph{Exemple.} Pour un contrat de valeur 120000 € avec 100000 € de primes nettes versées, soit 20000 € de gains latents, un retrait partiel de 10000 € induit un gain imposable de :
+\[ 10000 \times \frac{20000}{120000} = 1666,67€. \]
+Après huit ans, l'abattement couvre entièrement ce montant pour un contribuable célibataire, de sorte que l'impôt sur le revenu est nul. Les prélèvements sociaux s'élèvent à \(1666,67 \times 17,2\% = 286,67 €\).
+
+\subsubsection{Fiscalité en cas de transmission}
+\label{sec:fiscalite_transmission}
+
+En cas de décès, le capital net de prélèvements sociaux bénéficie d'un abattement de 152 500 € par bénéficiaire (pour les primes versées avant 70 ans) \cite{cgi_990i, cgi_757b}. Au-delà de ce seuil, les taux applicables sont \cite{bofip_mutations_av}:
+\begin{itemize}
+    \item 20\% jusqu'à 700000 €,
+    \item 31,25\% au-delà.
+\end{itemize}
+Ainsi, l'héritage net transmis par l'assurance-vie s'écrit :
+\begin{equation}
+    H_{AV} = C_n - PS – \text{Droits}_{AV}.
+\end{equation}
