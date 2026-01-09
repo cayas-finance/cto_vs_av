@@ -1,7 +1,9 @@
 __pycache__/
 *.pyc
 .env
-venv//script_video/
+venv/
+.venv/
+script_video/
 api/
 ui/
 images/
