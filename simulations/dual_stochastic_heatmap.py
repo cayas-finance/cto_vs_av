@@ -5,7 +5,7 @@ from matplotlib.colors import TwoSlopeNorm
 
 # Ajoute le dossier racine pour permettre les imports
 
-from cto_av_comp.model import (
+from enveloppes.model import (
     calculer_heritage_stochastique,
     get_regime_successoral
 )

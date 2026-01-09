@@ -6,4 +6,4 @@ venv/
 .venv/
 script_video/
 images/
-cto_av_comp.egg-info/
+*.egg-info/

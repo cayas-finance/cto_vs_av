@@ -4,10 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 
-# Ajoute le dossier racine pour permettre les imports depuis cto_av_comp.simulation_engine
+# Ajoute le dossier racine pour permettre les imports depuis enveloppes.simulation_engine
 
-from cto_av_comp.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
-from cto_av_comp.model import calcul_emoluments_notaire
+from enveloppes.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
+from enveloppes.model import calcul_emoluments_notaire
 
 def run_accident_heatmap():
     print("Génération de la heatmap accident (rendement vs année d'accident)...")
