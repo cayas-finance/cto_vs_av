@@ -1,9 +1,11 @@
 __pycache__/
 *.pyc
 .env
+.idea
 venv/
 .venv/
 script_video/
 api/
 ui/
 images/
+cto_av_comp.egg-info/
