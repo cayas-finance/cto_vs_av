@@ -43,3 +43,11 @@ Cela exécute tous les scripts de `simulations/`, génère les images dans `imag
 - Le CTO est en buy & hold par défaut ; la rotation applique la flat tax sur les plus-values réalisées.
 - Les retraits AV après 8 ans appliquent l’abattement annuel et les seuils d’IR réduits.
 - La succession AV applique les prélèvements sociaux sur les gains au décès.
+
+
+## Parcours pédagogique Cayas
+[https://app.cayas.fr/lessons](https://app.cayas.fr/lessons)
+
+
+## Simulateur plan de vie Cayas
+[https://app.cayas.fr/tools/life-plan](https://app.cayas.fr/tools/life-plan)
