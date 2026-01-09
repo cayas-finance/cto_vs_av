@@ -5,7 +5,5 @@ __pycache__/
 venv/
 .venv/
 script_video/
-api/
-ui/
 images/
 cto_av_comp.egg-info/
