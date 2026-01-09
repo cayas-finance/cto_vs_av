@@ -1,4 +1,5 @@
 <div style="background:#fff; display:inline-block;">
+  <a href="https://app.cayas.fr">
   <img src="Logo & icons Cayas/Logo & icons Cayas/logo cayas/png/black/logo-cayas-HD-1920.png" alt="Logo Cayas">
 </div>
 https://app.cayas.fr
@@ -6,6 +7,10 @@ https://app.cayas.fr
 Ce dépôt compare le CTO (Compte Titres) et l’AV (Assurance Vie) via plusieurs scénarios, avec une UI disponible dans votre navigateur et des simulations Python pour reproduire les images disponibles dans le post original. 
 
 Notons ici que ces figures diffèrent, actuellement, légèrement de celles du post, la raison est que j'ai ajouté les frais de notaire lors de la transmission d'un CTO, ce coût était initialement négligée. Je mets le post à jour dès que nous avons bien compris les frais et les conditions pour lesquels ils s'appliquent. Pour l'heure, nous appliquons uniquement le barème forfaitaire, il s'agit d'une approximation des frais réels. 
+
+## TODO : application en ligne 
+
+[app.cayas.fr](https://app.cayas.fr)
 
 ## Structure
 - `ui/` interface statique (ouvrir `ui/index.html` ou servir le dossier) et logique dans `ui/simulate.js`
