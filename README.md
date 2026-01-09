@@ -4,7 +4,7 @@
 </div>
 
 
-Ce dépôt compare la fiscalité du CTO (Compte Titres) et de l’AV (Assurance Vie) via plusieurs scénarios et la mise à disposition d'un simulateur et d'une interface disponible dans votre navigateur et des simulations Python pour reproduire les images disponibles dans le post original. 
+Ce dépôt compare la fiscalité du CTO (Compte Titres) et de l’AV (Assurance Vie) via plusieurs scénarios et la mise à disposition d'un simulateur et d'une interface disponible dans votre navigateur. Le code Python permet de reproduire les images disponibles dans le post original. 
 
 Notons ici que ces figures diffèrent, actuellement, légèrement de celles du post, la raison est que j'ai ajouté les frais de notaire lors de la transmission d'un CTO, ce coût était initialement négligée. Je mets le post à jour dès que nous avons bien compris les frais et les conditions pour lesquels ils s'appliquent. Pour l'heure, nous appliquons uniquement le barème forfaitaire, il s'agit d'une approximation des frais réels. 
 
