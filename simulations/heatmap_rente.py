@@ -4,11 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 
-# Ajoute le dossier racine pour permettre les imports depuis cto_av_comp.simulation_engine
+# Ajoute le dossier racine pour permettre les imports depuis enveloppes.simulation_engine
 
-from cto_av_comp.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
-from cto_av_comp.model import calcul_emoluments_notaire
-from cto_av_comp.constants import PS_RATE_AV, ABATTEMENT_AV_AVANT_70, BAREME_AV_AVANT_70, ABATTEMENT_AV_ANNUEL_INDIVIDUEL
+from enveloppes.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
+from enveloppes.model import calcul_emoluments_notaire
+from enveloppes.constants import PS_RATE_AV, ABATTEMENT_AV_AVANT_70, BAREME_AV_AVANT_70, ABATTEMENT_AV_ANNUEL_INDIVIDUEL
 
 def run_rente_heatmap():
     print("Génération de la heatmap rente (rendement vs âge au décès)...")

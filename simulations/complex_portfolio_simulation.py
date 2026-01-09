@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 # Ajoute le dossier racine pour permettre les imports depuis src
 
-from cto_av_comp.model import (
+from enveloppes.model import (
     get_regime_successoral,
     calcul_impot_progressif,
     calcul_emoluments_notaire

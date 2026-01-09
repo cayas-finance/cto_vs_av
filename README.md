@@ -15,7 +15,7 @@ Note : ces figures diffèrent actuellement légèrement de celles du post, car j
 ## Structure
 - `ui/` interface statique (ouvrir `ui/index.html` ou servir le dossier) et logique dans `ui/simulate.js`
 - `api/` service FastAPI pour les tests de parité et scénarios
-- `cto_av_comp/` modèle et helpers de simulation
+- `enveloppes/` modèle et helpers de simulation
 - `simulations/` scripts qui génèrent les figures dans `images/`
 
 ## Installation

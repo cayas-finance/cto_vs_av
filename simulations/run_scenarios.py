@@ -1,11 +1,11 @@
-from cto_av_comp.constants import (
+from enveloppes.constants import (
     ABATTEMENT_AV_AVANT_70,
     ABATTEMENT_AV_ANNUEL_INDIVIDUEL,
     BAREME_AV_AVANT_70,
     PS_RATE_AV,
 )
-from cto_av_comp.model import calcul_emoluments_notaire
-from cto_av_comp.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
+from enveloppes.model import calcul_emoluments_notaire
+from enveloppes.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
 
 
 def run_scenarios():

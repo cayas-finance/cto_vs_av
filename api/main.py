@@ -14,13 +14,13 @@ if parent_dir not in sys.path:
 from api.schemas.simulation import SimulationRequest, SimulationResult, DetailedMetrics
 
 # Import de la logique métier
-from cto_av_comp.model import (
+from enveloppes.model import (
     get_regime_successoral,
     calcul_impot_progressif,
     calcul_emoluments_notaire
 )
-from cto_av_comp.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
-from cto_av_comp.constants import ABATTEMENT_AV_ANNUEL_INDIVIDUEL
+from enveloppes.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
+from enveloppes.constants import ABATTEMENT_AV_ANNUEL_INDIVIDUEL
 
 app = FastAPI(title="CTO vs AV Simulator API")
 
