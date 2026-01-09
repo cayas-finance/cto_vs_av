@@ -1,0 +1,29 @@
+[project]
+name = "cto_av_comp"
+version = "0.1.0"
+description = "Simulation engine comparing CTO (Compte Titres Ordinaire) vs AV (Assurance Vie) fiscal envelopes."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "pillow"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "isort",
+    "httpx"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["cto_av_comp*", "api*"]
