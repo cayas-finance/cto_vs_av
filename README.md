@@ -1,8 +1,8 @@
 <div style="background:#fff; display:inline-block;">
   <a href="https://app.cayas.fr">
-  <img src="Logo & icons Cayas/Logo & icons Cayas/logo cayas/png/black/logo-cayas-HD-1920.png" alt="Logo Cayas">
+  <img src="Logo & icons Cayas/logo_readme/lg_cayas--scratched.png" alt="Logo Cayas">
 </div>
-https://app.cayas.fr
+
 
 Ce dépôt compare le CTO (Compte Titres) et l’AV (Assurance Vie) via plusieurs scénarios, avec une UI disponible dans votre navigateur et des simulations Python pour reproduire les images disponibles dans le post original. 
 
