@@ -1,16 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
-import sys
 import os
 
-# Ajoute le dossier racine pour permettre les imports depuis src
-
-from enveloppes.model import (
-    calculer_heritage_assurance_vie,
-    calculer_heritage_cto,
-    get_regime_successoral
-)
+from enveloppes.succession.heritage import calculer_heritage_assurance_vie, calculer_heritage_cto
+from enveloppes.core.fiscalite import get_regime_successoral
 
 def generate_profile_heatmap(yield_val, filename, title, frais_av=0.005):
     print(f"Génération de la heatmap : {title} (rendement {yield_val:.0%}, frais AV {frais_av:.2%})...")
