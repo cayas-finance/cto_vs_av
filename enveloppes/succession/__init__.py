@@ -5,8 +5,8 @@ from .results import SuccessionAVResult, SuccessionCTOResult
 
 __all__ = [
     "SuccessionAV",
+    "SuccessionAVResult",
     "SuccessionBase",
     "SuccessionCTO",
-    "SuccessionAVResult",
     "SuccessionCTOResult",
 ]

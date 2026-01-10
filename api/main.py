@@ -1,31 +1,27 @@
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
-import sys
 import os
 
-# Ajoute la racine au PYTHONPATH si besoin (optionnel en exécution module)
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
+from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 # Import des schémas
-from api.schemas.simulation import SimulationRequest, SimulationResult, DetailedMetrics
+from api.schemas.simulation import DetailedMetrics, SimulationRequest, SimulationResult
+from enveloppes.core.constants import ABATTEMENT_AV_ANNUEL_INDIVIDUEL
+from enveloppes.envelopes.av import AVSimulation
+from enveloppes.envelopes.cto import CTOSimulation
 
 # Import de la logique métier
 from enveloppes.succession.av import SuccessionAV
 from enveloppes.succession.cto import SuccessionCTO
-from enveloppes.envelopes.cto import CTOSimulation
-from enveloppes.envelopes.av import AVSimulation
-from enveloppes.core.constants import ABATTEMENT_AV_ANNUEL_INDIVIDUEL
 
 app = FastAPI(title="CTO vs AV Simulator API")
 
 @app.post("/simulate", response_model=SimulationResult)
 def simulate(req: SimulationRequest):
     # 1. Configuration des limites
-    deposit_until = req.deposit_duration_years if req.deposit_duration_years is not None else req.duree
+    deposit_until = (
+        req.deposit_duration_years if req.deposit_duration_years is not None else req.duree
+    )
     if req.withdrawal_start_year is not None:
         deposit_until = min(deposit_until, req.withdrawal_start_year)
     
@@ -47,13 +43,13 @@ def simulate(req: SimulationRequest):
             
         # Rachats
         if req.withdrawal_start_year is not None and year >= req.withdrawal_start_year:
-             if req.is_withdrawal_net:
-                 sim_cto.withdraw_net(req.withdrawal_amount)
-                 total_withdrawals_net_cto += req.withdrawal_amount 
-             else:
-                 net = sim_cto.withdraw(req.withdrawal_amount)
-                 total_withdrawals_net_cto += net
-             
+            if req.is_withdrawal_net:
+                sim_cto.withdraw_net(req.withdrawal_amount)
+                total_withdrawals_net_cto += req.withdrawal_amount
+            else:
+                net = sim_cto.withdraw(req.withdrawal_amount)
+                total_withdrawals_net_cto += net
+
         sim_cto.advance_one_year()
         
     succession_cto = SuccessionCTO()
@@ -92,17 +88,23 @@ def simulate(req: SimulationRequest):
     for year in range(req.duree):
         # Accumulation DCA
         if year < deposit_until and req.monthly_deposit > 0:
-             sim_av.deposit(req.monthly_deposit * 12)
+            sim_av.deposit(req.monthly_deposit * 12)
              
         # Rachats
         if req.withdrawal_start_year is not None and year >= req.withdrawal_start_year:
-             if req.is_withdrawal_net:
-                 sim_av.withdraw_net(req.withdrawal_amount, abattement_av_annuel=ABATTEMENT_AV_ANNUEL_INDIVIDUEL)
-                 total_withdrawals_net_av += req.withdrawal_amount
-             else:
-                 net = sim_av.withdraw(req.withdrawal_amount, abattement_av_annuel=ABATTEMENT_AV_ANNUEL_INDIVIDUEL)
-                 total_withdrawals_net_av += net
-             
+            if req.is_withdrawal_net:
+                sim_av.withdraw_net(
+                    req.withdrawal_amount,
+                    abattement_av_annuel=ABATTEMENT_AV_ANNUEL_INDIVIDUEL,
+                )
+                total_withdrawals_net_av += req.withdrawal_amount
+            else:
+                net = sim_av.withdraw(
+                    req.withdrawal_amount,
+                    abattement_av_annuel=ABATTEMENT_AV_ANNUEL_INDIVIDUEL,
+                )
+                total_withdrawals_net_av += net
+
         sim_av.advance_one_year()
         
     succession_av = SuccessionAV()
@@ -160,7 +162,7 @@ def simulate(req: SimulationRequest):
             scenario_net_heir_total=round(total_net_heir_cto_scenario, 2),
             total_tax_on_withdrawals=round(sim_cto.total_tax_on_gains, 2),
             cto_dmtg_donation=round(dmtg_cto, 2) if dmtg_cto is not None else None,
-            notary_fees=round(notary_fees_cto, 2)
+            notary_fees=round(notary_fees_cto, 2),
         ),
         breakdown_av=DetailedMetrics(
             gross_capital=round(sim_av.capital, 2),
@@ -168,16 +170,20 @@ def simulate(req: SimulationRequest):
             succession_gross=round(succession_gross_av, 2),
             taxable_base_succession=round(taxable_base_av, 2),
             net_heir_contract_only=round(net_contract_av_only, 2),
-            scenario_tax_total=round(total_tax_paid_av_scenario, 2), # Inclut PS + droits AV + droits autres biens
+            scenario_tax_total=round(total_tax_paid_av_scenario, 2),
             scenario_net_heir_total=round(total_net_heir_av_scenario, 2),
             av_ps_total=round(ps_succ, 2),
             av_rights_total=round(droits_totaux_av_scenario, 2),
             total_tax_on_withdrawals=round(sim_av.total_tax_on_gains, 2),
-            notary_fees=0.0
-        )
+            notary_fees=0.0,
+        ),
     )
 
-app.mount("/app", StaticFiles(directory=os.path.join(current_dir, "../ui"), html=True), name="ui")
+app.mount(
+    "/app",
+    StaticFiles(directory=os.path.join(os.path.dirname(__file__), "../ui"), html=True),
+    name="ui",
+)
 
 @app.get("/")
 def read_root():

@@ -1,5 +1,5 @@
-
 import os
+
 from PIL import Image, ImageDraw, ImageFont, PngImagePlugin
 
 # Configuration
@@ -9,7 +9,7 @@ LOGO_REL_PATH = "Logo & icons Cayas/Logo & icons Cayas/logo cayas/png/black/logo
 # Polices
 # Utilise OpenSans pour disposer d'une version italique correspondante
 FONT_REGULAR_PATH = "/usr/share/fonts/truetype/open-sans/OpenSans-Regular.ttf"
-FONT_ITALIC_PATH = "/usr/share/fonts/truetype/open-sans/OpenSans-Italic.ttf" 
+FONT_ITALIC_PATH = "/usr/share/fonts/truetype/open-sans/OpenSans-Italic.ttf"
 # Police de secours du projet si OpenSans n'est pas trouvée
 FALLBACK_FONT_PATH = "docs/cto-av/outfit/OutfitRegular.ttf"
 
@@ -30,12 +30,13 @@ TARGET_IMAGES = [
 
 SOURCE_TEXT = "Source: G. Flament, Comparatif CTO vs AV, Cayas.fr"
 
-TEXT_COLOR = (50, 50, 50, 255) 
+TEXT_COLOR = (50, 50, 50, 255)
 LOGO_WIDTH_PCT = 0.18
 PADDING_PCT = 0.02
 FOOTER_HEIGHT_PCT = 0.05
 HEADER_HEIGHT_PCT = 0.05
 LOGO_OUTLINE_PX = 6
+
 
 def get_font(is_italic, size):
     path = FONT_ITALIC_PATH if is_italic else FONT_REGULAR_PATH
@@ -48,6 +49,7 @@ def get_font(is_italic, size):
         print(f"Error loading font {path}: {e}")
         return ImageFont.load_default()
 
+
 def apply_watermark():
     logo_path = os.path.join(PROJECT_ROOT, LOGO_REL_PATH)
 
@@ -59,7 +61,7 @@ def apply_watermark():
 
     for img_rel_path in TARGET_IMAGES:
         img_full_path = os.path.join(PROJECT_ROOT, img_rel_path)
-        
+
         if not os.path.exists(img_full_path):
             print(f"Warning: Image not found: {img_full_path}")
             continue
@@ -71,34 +73,39 @@ def apply_watermark():
                     continue
                 original_image = base_image.convert("RGBA")
                 width, height = original_image.size
-                
+
                 # --- 1. Dimensions ---
                 header_height = int(height * HEADER_HEIGHT_PCT)
-                if header_height < 60: header_height = 60
-                
+                if header_height < 60:
+                    header_height = 60
+
                 footer_height = int(height * FOOTER_HEIGHT_PCT)
-                if footer_height < 45: footer_height = 45 
-                
+                if footer_height < 45:
+                    footer_height = 45
+
                 new_height = height + header_height + footer_height
-                new_image = Image.new("RGBA", (width, new_height), (255, 255, 255, 255)) 
-                
+                new_image = Image.new("RGBA", (width, new_height), (255, 255, 255, 255))
+
                 # --- 2. Construction du layout ---
                 new_image.paste(original_image, (0, header_height))
-                
+
                 # --- 3. Logo ---
                 logo = Image.open(logo_path).convert("RGBA")
-                
+
                 target_logo_width = int(width * LOGO_WIDTH_PCT)
                 logo_aspect_ratio = logo.height / logo.width
                 target_logo_height = int(target_logo_width * logo_aspect_ratio)
-                
+
                 max_logo_height = int(header_height * 0.95)
                 if target_logo_height > max_logo_height:
                     target_logo_height = max_logo_height
                     target_logo_width = int(target_logo_height / logo_aspect_ratio)
-                
-                logo_resized = logo.resize((target_logo_width, target_logo_height), Image.Resampling.LANCZOS)
-                
+
+                logo_resized = logo.resize(
+                    (target_logo_width, target_logo_height),
+                    Image.Resampling.LANCZOS,
+                )
+
                 padding = int(width * PADDING_PCT)
                 logo_box_width = target_logo_width + (LOGO_OUTLINE_PX * 2)
                 logo_box_height = target_logo_height + (LOGO_OUTLINE_PX * 2)
@@ -115,13 +122,14 @@ def apply_watermark():
                     (logo_x + LOGO_OUTLINE_PX, logo_y + LOGO_OUTLINE_PX),
                     logo_resized,
                 )
-                
+
                 # --- 4. Texte ---
                 draw = ImageDraw.Draw(new_image)
-                
+
                 font_size = int(footer_height * 0.55)
-                if font_size < 16: font_size = 16
-                
+                if font_size < 16:
+                    font_size = 16
+
                 font = get_font(False, font_size)
                 bbox = draw.textbbox((0, 0), SOURCE_TEXT, font=font)
                 text_width = bbox[2] - bbox[0]
@@ -147,6 +155,7 @@ def apply_watermark():
 
         except Exception as e:
             print(f"Failed to process {img_rel_path}: {e}")
+
 
 if __name__ == "__main__":
     apply_watermark()

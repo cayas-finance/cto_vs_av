@@ -7,14 +7,14 @@ VENV_PIP := $(VENV)/bin/pip
 SIM_DIR := simulations
 SIM_SCRIPTS := $(filter-out $(SIM_DIR)/__init__.py $(SIM_DIR)/apply_watermarks.py $(SIM_DIR)/apply_low_fee_watermarks.py,$(wildcard $(SIM_DIR)/*.py))
 
-.PHONY: api simulations simulation install install-venv install-deps
+.PHONY: api simulations simulation install install-venv install-deps lint
 
 install-venv:
 	$(PYTHON) -m venv $(VENV)
 	$(VENV_PIP) install --upgrade pip
 
 install-deps: install-venv
-	$(VENV_PIP) install -e .
+	$(VENV_PIP) install -e ".[dev]"
 	@echo "Activate with: source $(VENV)/bin/activate"
 
 install: install-deps
@@ -30,3 +30,6 @@ simulations:
 	$(PYTHON) $(SIM_DIR)/apply_watermarks.py
 
 simulation: simulations
+
+lint:
+	$(VENV_PY) -m ruff check .

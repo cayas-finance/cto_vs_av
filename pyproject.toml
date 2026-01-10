@@ -16,8 +16,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
-    "black",
-    "isort",
+    "ruff",
     "httpx"
 ]
 
@@ -27,3 +26,13 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["enveloppes*", "api*"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "C4", "PIE", "RUF", "N", "ARG", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
