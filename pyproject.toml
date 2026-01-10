@@ -1,7 +1,7 @@
 [project]
 name = "enveloppes"
 version = "0.1.0"
-description = "Simulation engine comparing CTO (Compte Titres Ordinaire) vs AV (Assurance Vie) fiscal envelopes."
+description = "Simulation engine comparing CTO vs AV fiscal envelopes."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
