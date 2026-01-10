@@ -1,24 +1,26 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
+import numpy as np
+from matplotlib.colors import TwoSlopeNorm
 
 from ..core.constants import (
+    ABATTEMENT_AV_APRES_70_GLOBAL,
     ABATTEMENT_AV_AVANT_70,
     BAREME_AV_AVANT_70,
-    ABATTEMENT_AV_APRES_70_GLOBAL,
 )
 from ..core.fiscalite import calcul_impot_progressif, get_regime_successoral
 from ..succession.heritage import calculer_heritage_assurance_vie, calculer_heritage_cto
 
-plt.rcParams.update({
-    "font.size": 14,
-    "axes.titlesize": 16,
-    "axes.labelsize": 18,
-    "xtick.labelsize": 12,
-    "ytick.labelsize": 12,
-    "legend.fontsize": 14,
-    "figure.titlesize": 20,
-})
+plt.rcParams.update(
+    {
+        "font.size": 14,
+        "axes.titlesize": 16,
+        "axes.labelsize": 18,
+        "xtick.labelsize": 12,
+        "ytick.labelsize": 12,
+        "legend.fontsize": 14,
+        "figure.titlesize": 20,
+    }
+)
 
 
 def simuler_et_tracer(
@@ -76,9 +78,13 @@ def simuler_et_tracer(
 
                 base_totale_av = max(
                     0.0,
-                    autres_biens_valeur + av_result.montant_soumis_succession - abattement_succession_total,
+                    autres_biens_valeur
+                    + av_result.montant_soumis_succession
+                    - abattement_succession_total,
                 )
-                droits_totaux_av_scenario = calcul_impot_progressif(base_totale_av, bareme_succession)
+                droits_totaux_av_scenario = calcul_impot_progressif(
+                    base_totale_av, bareme_succession
+                )
                 impot_succession_marginal_av = droits_totaux_av_scenario - droits_autres
 
             av_net_real = av_result.heritage_net - impot_succession_marginal_av
@@ -118,9 +124,13 @@ def simuler_et_tracer(
                 droits_autres = calcul_impot_progressif(base_autres, bareme_succession)
                 base_totale_av = max(
                     0.0,
-                    autres_biens_valeur + av_result.montant_soumis_succession - abattement_succession_total,
+                    autres_biens_valeur
+                    + av_result.montant_soumis_succession
+                    - abattement_succession_total,
                 )
-                droits_totaux_av_scenario = calcul_impot_progressif(base_totale_av, bareme_succession)
+                droits_totaux_av_scenario = calcul_impot_progressif(
+                    base_totale_av, bareme_succession
+                )
                 impot_succession_marginal_av = droits_totaux_av_scenario - droits_autres
 
             av_net_real = av_result.heritage_net - impot_succession_marginal_av
@@ -147,20 +157,6 @@ def simuler_et_tracer(
         vmin = max(vmin, clip_range[0])
         vmax = min(vmax, clip_range[1])
 
-    cayas_colors = [
-        "#7cfa72",
-        "#75fafc",
-        "#4451ff",
-        "#6945d8",
-        "#c5b5f8",
-        "#ed1a79",
-        "#ed81aa",
-        "#ef9755",
-        "#fcd414",
-        "#FD5144",
-    ]
-    cmap_cayas = LinearSegmentedColormap.from_list("cayas", cayas_colors, N=256)
-
     fig_2d, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8))
 
     vmin = float(np.nanmin([diff_heritage1, diff_heritage2]))
@@ -175,11 +171,11 @@ def simuler_et_tracer(
         norm=norm,
         cmap="RdYlBu",
     )
-    ax1.set_title(f"Impact des frais (r fixe : {rendement_fixe*100}%/an)")
+    ax1.set_title(f"{titre_prefix} Impact des frais (r fixe : {rendement_fixe*100}%/an)")
     ax1.set_xlabel("Années de placement")
     ax1.set_ylabel("Frais de gestion AV (%)")
 
-    im2 = ax2.imshow(
+    _ = ax2.imshow(
         diff_heritage2,
         origin="lower",
         extent=[0, duree_max, 0, rendement_max],
@@ -187,7 +183,9 @@ def simuler_et_tracer(
         norm=norm,
         cmap="RdYlBu",
     )
-    ax2.set_title(f"Impact du rendement (frais fixes : {frais_av_fixe*100}%/an)")
+    ax2.set_title(
+        f"{titre_prefix} Impact du rendement (frais fixes : {frais_av_fixe*100}%/an)"
+    )
     ax2.set_xlabel("Annees de placement")
     ax2.set_ylabel("Rendement annuel (%)")
 

@@ -1,13 +1,15 @@
 from enveloppes.core.constants import (
-    ABATTEMENT_AV_AVANT_70,
     ABATTEMENT_AV_ANNUEL_INDIVIDUEL,
+    ABATTEMENT_AV_AVANT_70,
     BAREME_AV_AVANT_70,
     PS_RATE_AV,
 )
-from enveloppes.core.fiscalite import calcul_emoluments_notaire
-from enveloppes.core.fiscalite import calculate_succession_tax_marginal
-from enveloppes.envelopes.cto import CTOSimulation
+from enveloppes.core.fiscalite import (
+    calcul_emoluments_notaire,
+    calculate_succession_tax_marginal,
+)
 from enveloppes.envelopes.av import AVSimulation
+from enveloppes.envelopes.cto import CTOSimulation
 
 
 def run_scenarios():
@@ -40,12 +42,17 @@ def run_scenarios():
 
     # Succession CTO
     # Purge PV : assiette = capital final
-    tax_succ_cto = calculate_succession_tax_marginal(capital_at_80_cto, 300_000, "ligne_directe")
+    tax_succ_cto = calculate_succession_tax_marginal(
+        capital_at_80_cto, 300_000, "ligne_directe"
+    )
     notary_fees_cto = calcul_emoluments_notaire(capital_at_80_cto)
     net_heir_cto = capital_at_80_cto - tax_succ_cto - notary_fees_cto
 
     print(f"CTO -> Cap 70ans: {capital_at_70_cto:,.0f}")
-    print(f"CTO -> Total Net Retraits: {total_net_withdrawals_cto:,.0f} (Brut retiré: {withdrawal*10})")
+    print(
+        "CTO -> Total Net Retraits: "
+        f"{total_net_withdrawals_cto:,.0f} (Brut retiré: {withdrawal*10})"
+    )
     print(f"CTO -> Cap Final Décès: {capital_at_80_cto:,.0f}")
     print(f"CTO -> Taxe Succ: {tax_succ_cto:,.0f}")
     print(f"CTO -> NET HEIR: {net_heir_cto:,.0f}")

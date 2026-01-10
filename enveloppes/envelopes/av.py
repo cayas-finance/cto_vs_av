@@ -1,8 +1,8 @@
 from ..core.constants import (
-    PS_RATE_AV,
+    AV_PV_150K_THRESHOLD,
     FLAT_TAX_PV_AV_AFTER_8,
     FLAT_TAX_PV_AV_BEFORE_8,
-    AV_PV_150K_THRESHOLD,
+    PS_RATE_AV,
 )
 from ..core.enveloppe_base import EnveloppeBase
 
