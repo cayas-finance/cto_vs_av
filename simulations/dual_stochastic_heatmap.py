@@ -3,12 +3,8 @@ import matplotlib.pyplot as plt
 import os
 from matplotlib.colors import TwoSlopeNorm
 
-# Ajoute le dossier racine pour permettre les imports
-
-from enveloppes.model import (
-    calculer_heritage_stochastique,
-    get_regime_successoral
-)
+from enveloppes.succession.stochastic import calculer_heritage_stochastique
+from enveloppes.core.fiscalite import get_regime_successoral
 
 def run_dual_stochastic_heatmap():
     print("Génération de la heatmap stochastique double (rendement vs rotation)...")

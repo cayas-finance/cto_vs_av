@@ -2,16 +2,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
-import sys
 import os
 
-# Ajoute le dossier racine pour permettre les imports depuis src
-
-from enveloppes.model import (
-    calculer_heritage_assurance_vie,
-    calculer_heritage_cto,
-    get_regime_successoral
-)
+from enveloppes.succession.heritage import calculer_heritage_assurance_vie, calculer_heritage_cto
+from enveloppes.core.fiscalite import get_regime_successoral
 
 def run():
     print("Generating Sibling Transmission Heatmap (5% Yield)...")

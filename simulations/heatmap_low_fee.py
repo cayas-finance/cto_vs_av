@@ -1,12 +1,3 @@
-import sys
-import os
-
-# S'assure que le répertoire racine est dans le PYTHONPATH
-current_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.abspath(os.path.join(current_dir, '..'))
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
-
 from simulations.generate_profile_heatmaps import generate_profile_heatmap
 
 if __name__ == "__main__":

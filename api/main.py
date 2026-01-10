@@ -14,13 +14,11 @@ if parent_dir not in sys.path:
 from api.schemas.simulation import SimulationRequest, SimulationResult, DetailedMetrics
 
 # Import de la logique métier
-from enveloppes.model import (
-    get_regime_successoral,
-    calcul_impot_progressif,
-    calcul_emoluments_notaire
-)
-from enveloppes.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
-from enveloppes.constants import ABATTEMENT_AV_ANNUEL_INDIVIDUEL
+from enveloppes.succession.av import SuccessionAV
+from enveloppes.succession.cto import SuccessionCTO
+from enveloppes.envelopes.cto import CTOSimulation
+from enveloppes.envelopes.av import AVSimulation
+from enveloppes.core.constants import ABATTEMENT_AV_ANNUEL_INDIVIDUEL
 
 app = FastAPI(title="CTO vs AV Simulator API")
 
@@ -34,64 +32,53 @@ def simulate(req: SimulationRequest):
     # --- AIDE COMMUNE : calcul des droits sur les autres biens ---
     
     # 2. Simulation CTO
-    sim_cto = SimulationEngine(
+    sim_cto = CTOSimulation(
         req.capital_initial,
         req.rendement,
-        req.frais_cto,
-        envelope_type="CTO",
         rotation_rate_cto=req.rotation_rate_cto,
+        frais_cto=req.frais_cto,
     )
     total_withdrawals_net_cto = 0.0
     
     for year in range(req.duree):
         # DCA
         if year < deposit_until and req.monthly_deposit > 0:
-            sim_cto.deposit(req.monthly_deposit * 12, 'CTO')
+            sim_cto.deposit(req.monthly_deposit * 12)
             
         # Rachats
         if req.withdrawal_start_year is not None and year >= req.withdrawal_start_year:
              if req.is_withdrawal_net:
-                 sim_cto.withdraw_net(req.withdrawal_amount, 'CTO')
+                 sim_cto.withdraw_net(req.withdrawal_amount)
                  total_withdrawals_net_cto += req.withdrawal_amount 
              else:
-                 net = sim_cto.withdraw(req.withdrawal_amount, 'CTO')
+                 net = sim_cto.withdraw(req.withdrawal_amount)
                  total_withdrawals_net_cto += net
              
         sim_cto.advance_one_year()
         
-    # Succession CTO / Donation CTO
-    abattement, bareme = get_regime_successoral(req.relation)
-    base_imposable_others_par_benef = max(0, (req.autres_biens / req.nb_beneficiaires) - abattement)
-    droits_others = calcul_impot_progressif(base_imposable_others_par_benef, bareme) * req.nb_beneficiaires
-
-    succession_gross_cto = sim_cto.capital + req.autres_biens
-    base_total_par_benef = max(0, (succession_gross_cto / req.nb_beneficiaires) - abattement)
-    taxable_base_cto = base_total_par_benef * req.nb_beneficiaires
-    droits_totaux_cto_scenario = calcul_impot_progressif(base_total_par_benef, bareme) * req.nb_beneficiaires
-
-    dmtg_cto = None
-    notary_fees_cto = 0.0
-    if req.cto_is_donation:
-        base_cto_par_benef = max(0, (sim_cto.capital / req.nb_beneficiaires) - abattement)
-        dmtg_cto = calcul_impot_progressif(base_cto_par_benef, bareme) * req.nb_beneficiaires
-        notary_fees_cto = calcul_emoluments_notaire(sim_cto.capital)
-        succession_restante = max(0.0, droits_totaux_cto_scenario - dmtg_cto)
-        net_heir_cto = (sim_cto.capital - dmtg_cto - notary_fees_cto) + (req.autres_biens - succession_restante)
-        tax_attributable_cto = dmtg_cto
-    else:
-        net_heir_cto = sim_cto.capital + req.autres_biens - droits_totaux_cto_scenario
-        tax_attributable_cto = droits_totaux_cto_scenario - droits_others
-
-    net_contract_cto_only = sim_cto.capital - tax_attributable_cto - notary_fees_cto
-    
+    succession_cto = SuccessionCTO()
+    cto_metrics = succession_cto.compute(
+        sim_cto,
+        autres_biens=req.autres_biens,
+        relation=req.relation,
+        nb_beneficiaires=req.nb_beneficiaires,
+        is_donation=req.cto_is_donation,
+    )
+    succession_gross_cto = cto_metrics.succession_gross
+    taxable_base_cto = cto_metrics.taxable_base
+    droits_totaux_cto_scenario = cto_metrics.scenario_tax_total
+    dmtg_cto = cto_metrics.cto_dmtg_donation
+    notary_fees_cto = cto_metrics.notary_fees
+    net_contract_cto_only = cto_metrics.net_heir_contract_only
+    total_net_heir_cto_scenario = cto_metrics.scenario_net_heir_total
     final_value_cto = net_contract_cto_only + total_withdrawals_net_cto
 
     # --- Simulation AV ---
     # Initialisation avec l'âge
-    sim_av = SimulationEngine(
+    sim_av = AVSimulation(
         req.capital_initial,
         req.rendement,
-        req.frais_av,
+        frais_gestion_av=req.frais_av,
         age_souscription=req.age_souscription,
         rotation_rate_av=req.rotation_rate_av,
         frais_versement_av=req.frais_versement_av,
@@ -105,87 +92,35 @@ def simulate(req: SimulationRequest):
     for year in range(req.duree):
         # Accumulation DCA
         if year < deposit_until and req.monthly_deposit > 0:
-             sim_av.deposit(req.monthly_deposit * 12, 'AV')
+             sim_av.deposit(req.monthly_deposit * 12)
              
         # Rachats
         if req.withdrawal_start_year is not None and year >= req.withdrawal_start_year:
              if req.is_withdrawal_net:
-                 sim_av.withdraw_net(req.withdrawal_amount, 'AV', abattement_av_annuel=ABATTEMENT_AV_ANNUEL_INDIVIDUEL)
+                 sim_av.withdraw_net(req.withdrawal_amount, abattement_av_annuel=ABATTEMENT_AV_ANNUEL_INDIVIDUEL)
                  total_withdrawals_net_av += req.withdrawal_amount
              else:
-                 net = sim_av.withdraw(req.withdrawal_amount, 'AV', abattement_av_annuel=ABATTEMENT_AV_ANNUEL_INDIVIDUEL)
+                 net = sim_av.withdraw(req.withdrawal_amount, abattement_av_annuel=ABATTEMENT_AV_ANNUEL_INDIVIDUEL)
                  total_withdrawals_net_av += net
              
         sim_av.advance_one_year()
         
-    # --- Fiscalité successorale AV (990I / 757B) ---
-    # 1. PS (prélèvements sociaux)
-    # PS dus sur les gains
-    gains_av_total = max(0, sim_av.capital - sim_av.total_versements)
-    ps_succ = gains_av_total * req.frais_sociaux_av
-    
-    # 2. Taxe 990I (versements < 70 ans)
-    # Assiette = valeur de rachat (capital net de PS) proratisée
-    # Fiscalité : 20% au-delà de 152 500 € par bénéficiaire
-    # On détermine la part de valeur appartenant au compartiment 990I
-    # Valeur_990 = Capital_Final * (Capital_990 / Capital_Total)
-    valeur_990_brut = sim_av.comp_990["capital"]
-    ratio_990 = valeur_990_brut / sim_av.capital if sim_av.capital > 0 else 0
-    # Déduction des PS au prorata
-    valeur_990_net_ps = valeur_990_brut - (ps_succ * ratio_990)
-    
-    abattement_990 = 152_500 * req.nb_beneficiaires
-    assiette_taxable_990 = max(0, valeur_990_net_ps - abattement_990)
-    # Taux forfaitaire 20% (jusqu'à 700k taxable), puis 31.25%
-    # Barème appliqué par bénéficiaire
-    tax_990 = 0.0
-    if req.nb_beneficiaires > 0:
-        masse_par_benef = assiette_taxable_990 / req.nb_beneficiaires
-        if masse_par_benef > 0:
-            if masse_par_benef <= 700_000:
-                tax_990 = masse_par_benef * 0.20 * req.nb_beneficiaires
-            else:
-                tax_990 = (700_000 * 0.20 + (masse_par_benef - 700_000) * 0.3125) * req.nb_beneficiaires
-
-    # 3. Taxe 757 B (versements >= 70 ans)
-    # Seules les primes versées sont taxées. Les gains sont exonérés.
-    # Si la valeur est inférieure aux primes, la valeur sert de base.
-    primes_757 = sim_av.comp_757["versements"]
-    valeur_757_brute = sim_av.comp_757["capital"]
-    
-    # Assiette brute avant abattement spécifique de 30 500 €
-    base_avant_abattement_757 = min(primes_757, valeur_757_brute)
-    
-    # Abattement global de 30 500 € (partagé entre bénéficiaires)
-    assiette_taxable_757 = max(0, base_avant_abattement_757 - 30_500)
-    
-    # Cette assiette s'ajoute à la succession classique (barème progressif)
-    tax_757_marginal = calculate_succession_tax_marginal(
-        assiette_taxable_757, 
-        req.autres_biens, 
-        req.relation, 
-        req.nb_beneficiaires
+    succession_av = SuccessionAV()
+    av_metrics = succession_av.compute(
+        sim_av,
+        autres_biens=req.autres_biens,
+        relation=req.relation,
+        nb_beneficiaires=req.nb_beneficiaires,
+        frais_sociaux_av=req.frais_sociaux_av,
     )
-    
-    # Impôt sur les autres biens uniquement (part AV)
-    base_autres_par_benef = max(0, (req.autres_biens / req.nb_beneficiaires) - abattement)
-    taxable_base_others = base_autres_par_benef * req.nb_beneficiaires
-    tax_autres = calcul_impot_progressif(base_autres_par_benef, bareme) * req.nb_beneficiaires
-    
-    succession_gross_av = (sim_av.capital - ps_succ) + req.autres_biens
-    taxable_base_av = taxable_base_others + assiette_taxable_990 + assiette_taxable_757
 
-    total_tax_paid_av_scenario = tax_autres + tax_757_marginal + tax_990 + ps_succ # PS inclus dans le coût total
-    
-    # Droits spécifiques AV (affichage)
-    droits_totaux_av_scenario = tax_990 + tax_757_marginal
-
-    # Net AV contrat seul : capital après PS et taxes AV
-    net_contract_av_only = sim_av.capital - ps_succ - tax_990 - tax_757_marginal
-    
-    # Net total héritiers (AV + autres biens)
-    total_net_heir_av_scenario = (req.autres_biens + sim_av.capital) - total_tax_paid_av_scenario
-    
+    succession_gross_av = av_metrics.succession_gross
+    taxable_base_av = av_metrics.taxable_base
+    total_tax_paid_av_scenario = av_metrics.scenario_tax_total
+    droits_totaux_av_scenario = av_metrics.av_rights_total
+    ps_succ = av_metrics.av_ps_total
+    net_contract_av_only = av_metrics.net_heir_contract_only
+    total_net_heir_av_scenario = av_metrics.scenario_net_heir_total
     final_value_av = net_contract_av_only + total_withdrawals_net_av
 
     # 4. Comparaison
@@ -194,16 +129,7 @@ def simulate(req: SimulationRequest):
     # Scénario CTO : net CTO + net autres biens
     # Scénario AV : net AV + net autres biens
     
-    total_net_heir_cto_scenario = net_heir_cto # Déjà calculé
-    # total_net_heir_av_scenario est déjà calculé
-    
-    # Vérification de cohérence
-    # net_contract_cto_only = sim_cto.capital - (droits_totaux_cto_scenario - droits_others)
-    # total_net_heir_cto_scenario = sim_cto.capital + req.autres_biens - droits_totaux_cto_scenario
-    # = sim_cto.capital - droits_totaux_cto_scenario + req.autres_biens
-    # = (net_contract_cto_only + droits_totaux_cto_scenario - droits_others) - droits_totaux_cto_scenario + req.autres_biens
-    # = net_contract_cto_only - droits_others + req.autres_biens.
-    # Oui, cohérent.
+    # total_net_heir_av_scenario est deja calcule
     
     # Patrimoine global incluant les rachats
     global_wealth_cto = total_net_heir_cto_scenario + total_withdrawals_net_cto

@@ -1,14 +1,18 @@
-import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 
-# Ajoute le dossier racine pour permettre les imports depuis enveloppes.simulation_engine
-
-from enveloppes.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
-from enveloppes.model import calcul_emoluments_notaire
-from enveloppes.constants import PS_RATE_AV, ABATTEMENT_AV_AVANT_70, BAREME_AV_AVANT_70, ABATTEMENT_AV_ANNUEL_INDIVIDUEL
+from enveloppes.core.fiscalite import calculate_succession_tax_marginal
+from enveloppes.envelopes.cto import CTOSimulation
+from enveloppes.envelopes.av import AVSimulation
+from enveloppes.core.fiscalite import calcul_emoluments_notaire
+from enveloppes.core.constants import (
+    PS_RATE_AV,
+    ABATTEMENT_AV_AVANT_70,
+    BAREME_AV_AVANT_70,
+    ABATTEMENT_AV_ANNUEL_INDIVIDUEL,
+)
 
 def run_rente_heatmap():
     print("Génération de la heatmap rente (rendement vs âge au décès)...")
@@ -40,12 +44,12 @@ def run_rente_heatmap():
             withdrawal_duration = int(death_age - retire_age)
             
             # --- CTO ---
-            sim_cto = SimulationEngine(cap_ini, yld, 0, envelope_type="CTO")
+            sim_cto = CTOSimulation(cap_ini, yld)
             for _ in range(accum_duration): sim_cto.advance_one_year()
             
             net_withdrawals_cto = 0
             for _ in range(withdrawal_duration):
-                net_withdrawals_cto += sim_cto.withdraw_net(withdrawal_net, 'CTO')
+                net_withdrawals_cto += sim_cto.withdraw_net(withdrawal_net)
                 sim_cto.advance_one_year()
             
             # Succession
@@ -55,12 +59,15 @@ def run_rente_heatmap():
             total_cto = net_withdrawals_cto + net_heir_cto
             
             # --- AV ---
-            sim_av = SimulationEngine(cap_ini, yld, fees_av, envelope_type="AV")
+            sim_av = AVSimulation(cap_ini, yld, frais_gestion_av=fees_av)
             for _ in range(accum_duration): sim_av.advance_one_year()
             
             net_withdrawals_av = 0
             for _ in range(withdrawal_duration):
-                net_withdrawals_av += sim_av.withdraw_net(withdrawal_net, 'AV', abattement_av_annuel=ABATTEMENT_AV_ANNUEL_INDIVIDUEL)
+                net_withdrawals_av += sim_av.withdraw_net(
+                    withdrawal_net,
+                    abattement_av_annuel=ABATTEMENT_AV_ANNUEL_INDIVIDUEL,
+                )
                 sim_av.advance_one_year()
                 
             # Succession

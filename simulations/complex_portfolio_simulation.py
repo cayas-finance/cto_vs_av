@@ -1,14 +1,11 @@
-import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Ajoute le dossier racine pour permettre les imports depuis src
-
-from enveloppes.model import (
+from enveloppes.core.fiscalite import (
     get_regime_successoral,
     calcul_impot_progressif,
-    calcul_emoluments_notaire
+    calcul_emoluments_notaire,
 )
 
 def simulate_complex_diversified_portfolio():

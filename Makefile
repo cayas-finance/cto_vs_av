@@ -1,4 +1,6 @@
 PYTHON ?= python3
+PYTHONPATH ?=
+export PYTHONPATH := $(CURDIR):$(PYTHONPATH)
 VENV ?= .venv
 VENV_PY := $(VENV)/bin/python
 VENV_PIP := $(VENV)/bin/pip

@@ -1,13 +1,12 @@
-import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 
-# Ajoute le dossier racine pour permettre les imports depuis enveloppes.simulation_engine
-
-from enveloppes.simulation_engine import SimulationEngine, calculate_succession_tax_marginal
-from enveloppes.model import calcul_emoluments_notaire
+from enveloppes.core.fiscalite import calculate_succession_tax_marginal
+from enveloppes.envelopes.cto import CTOSimulation
+from enveloppes.envelopes.av import AVSimulation
+from enveloppes.core.fiscalite import calcul_emoluments_notaire
 
 def run_accident_heatmap():
     print("Génération de la heatmap accident (rendement vs année d'accident)...")
@@ -32,10 +31,10 @@ def run_accident_heatmap():
         for j, yld in enumerate(yields): # Axe X
             
             # --- CTO avec accident ---
-            sim_cto = SimulationEngine(cap_ini, yld, 0, envelope_type="CTO")
+            sim_cto = CTOSimulation(cap_ini, yld)
             for year in range(total_duration):
                 if year == acc_year:
-                    sim_cto.force_liquidation_tax_event('CTO') # Accident
+                    sim_cto.force_liquidation_tax_event() # Accident
                 sim_cto.advance_one_year()
                 
             # Succession
@@ -45,11 +44,11 @@ def run_accident_heatmap():
             net_cto = sim_cto.capital - tax_cto - notary_fees_cto
             
             # --- AV (accident neutre) ---
-            sim_av = SimulationEngine(cap_ini, yld, fees_av, envelope_type="AV")
+            sim_av = AVSimulation(cap_ini, yld, frais_gestion_av=fees_av)
             for year in range(total_duration):
                 # L'accident n'a pas d'effet en AV (arbitrage)
                 if year == acc_year:
-                    sim_av.force_liquidation_tax_event('AV') 
+                    sim_av.force_liquidation_tax_event()
                 sim_av.advance_one_year()
                 
             # Succession
