@@ -98,6 +98,29 @@ L'assurance vie bénéficie d'un abattement annuel de 4 600 € sur la part de g
 
 ## Situations Particulières
 
+### Actif très distribuant (SCPI / dividendes)
+
+L'un des rares cas où l'AV peut redevenir compétitive est celui d'un actif très distribuant. En CTO, chaque distribution est fiscalisée immédiatement (flat tax), ce qui casse la capitalisation. En AV, ces flux restent dans l'enveloppe et capitalisent sans impôt tant qu'il n'y a pas de rachat.
+
+Simulation (script `simulations/scenario_actif_distribuant.py`) :
+
+* Capital initial : 100 000 €
+* Horizon : 20 ans
+* Distribution : 5 % / an (SCPI typique)
+* Revalorisation : 1 % / an
+* AV : 0,5 % de frais de gestion, versements avant 70 ans, 1 bénéficiaire
+* Autres biens : 300 000 € (ligne directe), distributions réinvesties
+
+| Indicateur | CTO | AV |
+| :--- | :--- | :--- |
+| Capital final brut | 237 961 € | 291 776 € |
+| Impôts annuels / frais cumulés | 48 894 € | 17 434 € |
+| Succession + frais de notaire / PS + taxe AV | 47 592 € + 3 512 € | 32 985 € + 21 258 € |
+| Net héritier | 186 856 € | 237 532 € |
+| Avantage AV | - | **+50 676 € (+21,3 %)** |
+
+On retrouve bien l'intuition : plus la part de rendement distribuée (et donc fiscalisée chaque année) est élevée, plus l'AV reprend l'avantage. À l'inverse, un actif à faible distribution et forte revalorisation (ETF capitalisant) redonne mécaniquement la main au CTO. Si la fiscalité appliquée aux distributions est supérieure à la flat tax (TMI + PS sur des revenus fonciers), l'avantage de l'AV est encore amplifié.
+
 ### Transmission Collatérale (Frères et Sœurs)
 
 ![Heatmap Frères Soeurs](images/heatmap_siblings_5pct.png)

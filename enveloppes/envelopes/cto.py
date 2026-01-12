@@ -24,7 +24,9 @@ class CTOSimulation(EnveloppeBase):
         if self.cto_capital > 0:
             base_capital = self.cto_capital
             gain = base_capital * self.rendement
-            self.cto_capital = base_capital + gain
+            frais = base_capital * self.frais_cto
+            self.cto_capital = base_capital + gain - frais
+            self.total_frais_payes += frais
 
         if self.rotation_rate_cto > 0 and self.capital > 0:
             rotation_rate = min(1.0, max(0.0, self.rotation_rate_cto))
