@@ -4,7 +4,8 @@ from PIL import Image, ImageDraw, ImageFont, PngImagePlugin
 
 # Configuration
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-LOGO_REL_PATH = "Logo & icons Cayas/Logo & icons Cayas/logo cayas/png/black/logo-cayas-HD-1920.png"
+LOGO_REL_PATH = "assets/logo_cayas/png/black/logo-cayas-HD-1920.png"
+
 
 # Polices
 # Utilise OpenSans pour disposer d'une version italique correspondante
