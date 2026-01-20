@@ -1,6 +1,7 @@
 import os
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -16,6 +17,14 @@ from enveloppes.succession.cto import SuccessionCTO
 
 app = FastAPI(title="CTO vs AV Simulator API")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.post("/simulate", response_model=SimulationResult)
 def simulate(req: SimulationRequest):
     # 1. Configuration des limites
@@ -24,9 +33,9 @@ def simulate(req: SimulationRequest):
     )
     if req.withdrawal_start_year is not None:
         deposit_until = min(deposit_until, req.withdrawal_start_year)
-    
+
     # --- AIDE COMMUNE : calcul des droits sur les autres biens ---
-    
+
     # 2. Simulation CTO
     sim_cto = CTOSimulation(
         req.capital_initial,
@@ -35,12 +44,12 @@ def simulate(req: SimulationRequest):
         frais_cto=req.frais_cto,
     )
     total_withdrawals_net_cto = 0.0
-    
+
     for year in range(req.duree):
         # DCA
         if year < deposit_until and req.monthly_deposit > 0:
             sim_cto.deposit(req.monthly_deposit * 12)
-            
+
         # Rachats
         if req.withdrawal_start_year is not None and year >= req.withdrawal_start_year:
             if req.is_withdrawal_net:
@@ -51,7 +60,7 @@ def simulate(req: SimulationRequest):
                 total_withdrawals_net_cto += net
 
         sim_cto.advance_one_year()
-        
+
     succession_cto = SuccessionCTO()
     cto_metrics = succession_cto.compute(
         sim_cto,
@@ -84,12 +93,12 @@ def simulate(req: SimulationRequest):
         frais_sociaux_av=req.frais_sociaux_av,
     )
     total_withdrawals_net_av = 0.0
-    
+
     for year in range(req.duree):
         # Accumulation DCA
         if year < deposit_until and req.monthly_deposit > 0:
             sim_av.deposit(req.monthly_deposit * 12)
-             
+
         # Rachats
         if req.withdrawal_start_year is not None and year >= req.withdrawal_start_year:
             if req.is_withdrawal_net:
@@ -106,7 +115,7 @@ def simulate(req: SimulationRequest):
                 total_withdrawals_net_av += net
 
         sim_av.advance_one_year()
-        
+
     succession_av = SuccessionAV()
     av_metrics = succession_av.compute(
         sim_av,
@@ -126,26 +135,26 @@ def simulate(req: SimulationRequest):
     final_value_av = net_contract_av_only + total_withdrawals_net_av
 
     # 4. Comparaison
-    
+
     # Lecture globale :
     # Scénario CTO : net CTO + net autres biens
     # Scénario AV : net AV + net autres biens
-    
+
     # total_net_heir_av_scenario est deja calcule
-    
+
     # Patrimoine global incluant les rachats
     global_wealth_cto = total_net_heir_cto_scenario + total_withdrawals_net_cto
     global_wealth_av = total_net_heir_av_scenario + total_withdrawals_net_av
-    
+
     diff = global_wealth_av - global_wealth_cto
     max_global = max(global_wealth_av, global_wealth_cto)
-    
+
     pct = 0.0
     if max_global > 0:
         pct = (diff / max_global) * 100
-        
+
     winner = "AV" if diff > 0 else "CTO"
-    
+
     return SimulationResult(
         net_cto=round(final_value_cto, 2),
         net_av=round(final_value_av, 2),
