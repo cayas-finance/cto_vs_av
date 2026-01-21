@@ -176,7 +176,7 @@ def simulate(req: SimulationRequest):
         breakdown_av=DetailedMetrics(
             gross_capital=round(sim_av.capital, 2),
             total_fees=round(sim_av.total_frais_payes, 2),
-            succession_gross=round(succession_gross_av, 2),
+            succession_gross=round(sim_av.capital + req.autres_biens, 2),
             taxable_base_succession=round(taxable_base_av, 2),
             net_heir_contract_only=round(net_contract_av_only, 2),
             scenario_tax_total=round(total_tax_paid_av_scenario, 2),
