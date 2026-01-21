@@ -55,10 +55,11 @@ class SuccessionAV(SuccessionBase):
         taxable_base_others = base_autres_par_benef * nb_benef
         tax_autres = calcul_impot_progressif(base_autres_par_benef, bareme) * nb_benef
 
-        succession_gross = (sim.capital - ps_succ) + autres_biens
+        succession_gross = sim.capital + autres_biens
         taxable_base = taxable_base_others + assiette_taxable_990 + assiette_taxable_757
 
-        total_tax_paid = tax_autres + tax_757_marginal + tax_990 + ps_succ
+        total_rights = tax_autres + tax_757_marginal + tax_990
+        total_tax_paid = total_rights + ps_succ
         droits_totaux = tax_990 + tax_757_marginal
 
         net_contract_only = sim.capital - ps_succ - tax_990 - tax_757_marginal
@@ -67,7 +68,7 @@ class SuccessionAV(SuccessionBase):
         return SuccessionAVResult(
             succession_gross=succession_gross,
             taxable_base=taxable_base,
-            scenario_tax_total=total_tax_paid,
+            scenario_tax_total=total_rights,
             scenario_net_heir_total=total_net_heir,
             net_heir_contract_only=net_contract_only,
             av_ps_total=ps_succ,
