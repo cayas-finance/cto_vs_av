@@ -10,7 +10,6 @@ Note : ces figures diffèrent actuellement légèrement de celles du post, car j
 [app.cayas.fr](https://app.cayas.fr)
 
 ## Structure
-- `ui/` interface statique (ouvrir `ui/index.html` ou servir le dossier) et logique dans `ui/simulate.js`
 - `api/` service FastAPI pour les tests de parité et scénarios
 - `enveloppes/` logique de simulation (core/, envelopes/, succession/, analysis/)
 - `simulations/` scripts qui génèrent les figures dans `images/`
@@ -38,7 +37,7 @@ Cela exécute tous les scripts de `simulations/`, génère les images dans `imag
 ## Notes / hypothèses
 - Le rendement est modélisé en brut, avant frais d’enveloppe et fiscalité.
 - Le CTO est en buy & hold par défaut ; la rotation applique la flat tax sur les plus-values réalisées.
-- Les retraits AV après 8 ans appliquent l’abattement annuel et les seuils d’IR réduits.
+- Les retraits AV après 8 ans appliquent l’abattement annuel et les sels d’IR réduits.
 - La succession AV applique les prélèvements sociaux sur les gains au décès.
 
 
