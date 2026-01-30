@@ -19,8 +19,8 @@ def generate_profile_heatmap(yield_val, filename, title, frais_av=0.005):
     resol_y = 50  # Capital
 
     durations = np.linspace(10, 50, resol_x)
-    # 100k à 15M
-    capitals = np.geomspace(100_000, 15_000_000, resol_y)
+    # 10k à 15M
+    capitals = np.geomspace(10_000, 15_000_000, resol_y)
 
     # Paramètres fixes
     autres_biens = 300_000
@@ -115,6 +115,7 @@ def generate_profile_heatmap(yield_val, filename, title, frais_av=0.005):
     # Ticks arrondis
     # Valeurs à afficher
     round_caps = [
+        10_000,
         100_000,
         500_000,
         1_000_000,
