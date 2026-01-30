@@ -26,3 +26,29 @@ class SuccessionAVResult:
     av_rights_total: float
     tax_990: float
     tax_757_marginal: float
+
+
+@dataclass
+class SuccessionPEAResult:
+    succession_gross: float
+    taxable_base: float
+    scenario_tax_total: float
+    net_heir_contract_only: float
+    scenario_net_heir_total: float
+    tax_attributable_pea: float
+    droits_others: float
+    notary_fees: float
+    pea_dmtg_donation: Optional[float] = None
+
+
+@dataclass
+class SuccessionPERResult:
+    succession_gross: float
+    taxable_base: float
+    scenario_tax_total: float
+    net_heir_contract_only: float
+    scenario_net_heir_total: float
+    tax_attributable_per: float
+    droits_others: float
+    notary_fees: float
+    per_dmtg_donation: Optional[float] = None
