@@ -125,7 +125,6 @@ def simulate(req: SimulationRequest):
         frais_sociaux_av=req.frais_sociaux_av,
     )
 
-    succession_gross_av = av_metrics.succession_gross
     taxable_base_av = av_metrics.taxable_base
     total_tax_paid_av_scenario = av_metrics.scenario_tax_total
     droits_totaux_av_scenario = av_metrics.av_rights_total
