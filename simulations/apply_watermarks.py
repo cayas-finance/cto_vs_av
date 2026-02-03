@@ -38,7 +38,7 @@ MIN_FONT_SIZE = 20
 MAX_FONT_SIZE = 100
 
 
-def get_font(is_italic, size):
+def get_font(size):
     font_path = os.path.join(PROJECT_ROOT, FONT_PATH)
     try:
         return ImageFont.truetype(font_path, size)
