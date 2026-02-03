@@ -129,7 +129,7 @@ def apply_watermark():
                 if font_size > MAX_FONT_SIZE:
                     font_size = MAX_FONT_SIZE
 
-                font = get_font(False, font_size)
+                font = get_font(font_size)
                 bbox = draw.textbbox((0, 0), SOURCE_TEXT, font=font)
                 text_width = bbox[2] - bbox[0]
                 
