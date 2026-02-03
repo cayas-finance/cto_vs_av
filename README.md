@@ -1,7 +1,7 @@
 <img src="assets/lg_cayas--scratched.png" alt="Logo Cayas">
 
 
-Ce dépôt compare la fiscalité du CTO (Compte Titres) et de l’AV (Assurance Vie) via plusieurs scénarios. Il met à disposition une API python et une abstraction de l'ensemble des règles fiscales des différentes enveloppes françaises. Le code Python permet de reproduire les images du post original.
+Ce dépôt compare la fiscalité du CTO (Compte Titres) et de l’AV (Assurance Vie) via plusieurs scénarios. Il met à disposition une API python et une abstraction de l'ensemble des règles fiscales des différentes enveloppes françaises. Le code Python permet de reproduire les images du [post original](https://www.reddit.com/r/vosfinances/comments/1q3mszi/cto_vs_assurance_vie_quelle_est_la_meilleure).
 
 Note : ces figures diffèrent actuellement légèrement de celles du post, car j'ai ajouté les frais de notaire lors de la transmission d'un CTO - ce coût était initialement négligé. Je mettrai à jour le post dès que nous aurons bien compris ces frais de notaire et les conditions pour lesquelles ils s'appliquent. Pour l'heure, nous appliquons uniquement le barème forfaitaire. Il s'agit d'une approximation des frais réels.
 
