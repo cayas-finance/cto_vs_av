@@ -187,12 +187,16 @@ def simulate(req: SimulationRequest):
         ),
     )
 
-app.mount(
-    "/app",
-    StaticFiles(directory=os.path.join(os.path.dirname(__file__), "../ui"), html=True),
-    name="ui",
-)
+UI_DIR = os.path.join(os.path.dirname(__file__), "../ui")
+if os.path.isdir(UI_DIR):
+    app.mount(
+        "/app",
+        StaticFiles(directory=UI_DIR, html=True),
+        name="ui",
+    )
 
 @app.get("/")
 def read_root():
-    return RedirectResponse(url="/app")
+    if os.path.isdir(UI_DIR):
+        return RedirectResponse(url="/app")
+    return {"status": "ok", "docs": "/docs"}
