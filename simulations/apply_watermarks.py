@@ -8,11 +8,7 @@ LOGO_REL_PATH = "assets/logo_cayas/png/black/logo-cayas-HD-1920.png"
 
 
 # Polices
-# Utilise OpenSans pour disposer d'une version italique correspondante
-FONT_REGULAR_PATH = "/usr/share/fonts/truetype/open-sans/OpenSans-Regular.ttf"
-FONT_ITALIC_PATH = "/usr/share/fonts/truetype/open-sans/OpenSans-Italic.ttf"
-# Police de secours du projet si OpenSans n'est pas trouvée
-FALLBACK_FONT_PATH = "docs/cto-av/outfit/OutfitRegular.ttf"
+FONT_PATH = "Outfit/static/Outfit-Regular.ttf"
 
 TARGET_IMAGES = [
     "images/heatmap_tipping_point_3pct.png",
@@ -37,17 +33,17 @@ PADDING_PCT = 0.02
 FOOTER_HEIGHT_PCT = 0.05
 HEADER_HEIGHT_PCT = 0.05
 LOGO_OUTLINE_PX = 6
+FORCE_REAPPLY = True
+MIN_FONT_SIZE = 20
+MAX_FONT_SIZE = 100
 
 
 def get_font(is_italic, size):
-    path = FONT_ITALIC_PATH if is_italic else FONT_REGULAR_PATH
-    if not os.path.exists(path):
-        print(f"Font not found: {path}, using fallback.")
-        path = os.path.join(PROJECT_ROOT, FALLBACK_FONT_PATH)
+    font_path = os.path.join(PROJECT_ROOT, FONT_PATH)
     try:
-        return ImageFont.truetype(path, size)
+        return ImageFont.truetype(font_path, size)
     except Exception as e:
-        print(f"Error loading font {path}: {e}")
+        print(f"Error loading font {font_path}: {e}")
         return ImageFont.load_default()
 
 
@@ -69,7 +65,7 @@ def apply_watermark():
 
         try:
             with Image.open(img_full_path) as base_image:
-                if base_image.info.get("watermarked") == "1":
+                if base_image.info.get("watermarked") == "1" and not FORCE_REAPPLY:
                     print(f"Skipping already watermarked: {img_rel_path}")
                     continue
                 original_image = base_image.convert("RGBA")
@@ -127,9 +123,11 @@ def apply_watermark():
                 # --- 4. Texte ---
                 draw = ImageDraw.Draw(new_image)
 
-                font_size = int(footer_height * 0.55)
-                if font_size < 16:
-                    font_size = 16
+                font_size = int(height * 0.0275)
+                if font_size < MIN_FONT_SIZE:
+                    font_size = MIN_FONT_SIZE
+                if font_size > MAX_FONT_SIZE:
+                    font_size = MAX_FONT_SIZE
 
                 font = get_font(False, font_size)
                 bbox = draw.textbbox((0, 0), SOURCE_TEXT, font=font)

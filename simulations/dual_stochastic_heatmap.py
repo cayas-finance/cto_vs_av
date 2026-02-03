@@ -9,6 +9,18 @@ from enveloppes.succession.stochastic import calculer_heritage_stochastique
 
 def run_dual_stochastic_heatmap():
     print("Génération de la heatmap stochastique double (rendement vs rotation)...")
+
+    # Styles de police pour améliorer la lisibilité
+    plt.rcParams.update(
+        {
+            "font.size": 24,
+            "axes.titlesize": 16,
+            "axes.labelsize": 14,
+            "xtick.labelsize": 12,
+            "ytick.labelsize": 12,
+            "legend.fontsize": 12,
+        }
+    )
     
     # Paramètres alignés sur stochastic_comparison.py
     capital_initial = 100_000
@@ -144,7 +156,7 @@ def run_dual_stochastic_heatmap():
     )
 
     plt.suptitle(
-        "Avantage relatif moyen AV vs CTO (Horizon 30 ans, Volatilité 15%)", fontsize=16
+        "Avantage relatif moyen AV vs CTO (Horizon 30 ans, Volatilité 15%)", fontsize=18
     )
 
     output_path = os.path.join(
